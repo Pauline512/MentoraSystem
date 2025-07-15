@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Progress Tracking Dashboard</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .stat-card {
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .progress-bar-animated {
+        animation: progress-bar-stripes 1s linear infinite;
+      }
+
+      .overdue {
+        border-left: 4px solid #dc3545;
+      }
+
+      .completed {
+        border-left: 4px solid #28a745;
+      }
+
+      .in-progress {
+        border-left: 4px solid #ffc107;
+      }
+
+      .not-started {
+        border-left: 4px solid #6c757d;
+      }
+    </style>
+  </head>
+  <body class="bg-light">
+    <div class="container-fluid py-4">
+      <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">
+                <i class="fas fa-chart-line me-2"></i>
+                Progress Tracking
+              </h5>
+              <ul class="nav nav-pills flex-column">
+                <li class="nav-item">
+                  <a
+                    class="nav-link active"
+                    href="{% url 'progress_tracking:dashboard' %}"
+                  >
+                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a
+                    class="nav-link"
+                    href="{% url 'progress_tracking:goal_list' %}"
+                  >
+                    <i class="fas fa-bullseye me-2"></i>Goals
+                  </a>
+                </li>
+                {% if user.mentee %}
+                <li class="nav-item">
+                  <a
+                    class="nav-link"
+                    href="{% url 'progress_tracking:goal_create' %}"
+                  >
+                    <i class="fas fa-plus me-2"></i>Add Goal
+                  </a>
+                </li>
+                {% endif %}
+                {% if user.mentor %}
+                <li class="nav-item">
+                  <a
+                    class="nav-link"
+                    href="{% url 'progress_tracking:progress_create' %}"
+                  >
+                    <i class="fas fa-chart-bar me-2"></i>Add Progress
+                  </a>
+                </li>
+                {% endif %}
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10">
+          <!-- Header -->
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3">
+              {% if user_role == 'mentor' %}
+              <i class="fas fa-chalkboard-teacher me-2"></i>Mentor Dashboard {%
+              else %} <i class="fas fa-user-graduate me-2"></i>My Progress
+              Dashboard {% endif %}
+            </h1>
+            <div class="text-muted">
+              Welcome, {{ user.get_full_name|default:user.username }}!
+            </div>
+          </div>
+
+          <!-- Statistics Cards -->
+          <div class="row mb-4">
+            <div class="col-md-3">
+              <div class="card stat-card bg-primary text-white">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between">
+                    <div>
+                      <h5 class="card-title">Total Goals</h5>
+                      <h2 class="mb-0">
+                        {{ goal_stats.total_goals|default:0 }}
+                      </h2>
+                    </div>
+                    <div class="align-self-center">
+                      <i class="fas fa-bullseye fa-2x"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <div class="card stat-card bg-success text-white">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between">
+                    <div>
+                      <h5 class="card-title">Completed</h5>
+                      <h2 class="mb-0">{{ completed_goals }}</h2>
+                    </div>
+                    <div class="align-self-center">
+                      <i class="fas fa-check-circle fa-2x"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <div class="card stat-card bg-warning text-white">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between">
+                    <div>
+                      <h5 class="card-title">In Progress</h5>
+                      <h2 class="mb-0">{{ active_goals }}</h2>
+                    </div>
+                    <div class="align-self-center">
+                      <i class="fas fa-spinner fa-2x"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <div class="card stat-card bg-danger text-white">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between">
+                    <div>
+                      <h5 class="card-title">Overdue</h5>
+                      <h2 class="mb-0">{{ overdue_goals|length }}</h2>
+                    </div>
+                    <div class="align-self-center">
+                      <i class="fas fa-exclamation-triangle fa-2x"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Progress Overview -->
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>Overall Progress
+                  </h5>
+                </div>
+                <div class="card-body">
+                  <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                      <span>Average Progress</span>
+                      <span
+                        >{{ goal_stats.avg_progress|floatformat:1|default:0
+                        }}%</span
+                      >
+                    </div>
+                    <div class="progress">
+                      <div
+                        class="progress-bar progress-bar-striped progress-bar-animated"
+                        role="progressbar"
+                        style="width: {{ goal_stats.avg_progress|default_if_none:'0'|floatformat:0 }}%;"
+                      ></div>
+                    </div>
+                  </div>
+
+                  {% if user_role == 'mentor' %}
+                  <div class="text-center">
+                    <h6>
+                      Managing {{ total_mentees }} mentee{{
+                      total_mentees|pluralize }}
+                    </h6>
+                  </div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="card-title mb-0">
+                    <i class="fas fa-exclamation-triangle me-2 text-danger"></i>
+                    Overdue Goals
+                  </h5>
+                </div>
+                <div class="card-body">
+                  {% if overdue_goals %}
+                  <div class="list-group list-group-flush">
+                    {% for goal in overdue_goals|slice:":3" %}
+                    <div class="list-group-item overdue">
+                      <div class="d-flex justify-content-between">
+                        <div>
+                          <h6 class="mb-1">{{ goal.title }}</h6>
+                          <small class="text-muted">
+                            Due: {{ goal.target_date|date:"M d, Y" }} ({{
+                            goal.days_remaining }} days overdue)
+                          </small>
+                        </div>
+                        <div class="text-end">
+                          <span class="badge bg-danger"
+                            >{{ goal.progress_percentage }}%</span
+                          >
+                        </div>
+                      </div>
+                    </div>
+                    {% endfor %}
+                  </div>
+                  {% if overdue_goals|length > 3 %}
+                  <div class="text-center mt-2">
+                    <a
+                      href="{% url 'progress_tracking:goal_list' %}?status=overdue"
+                      class="btn btn-sm btn-outline-danger"
+                    >
+                      View All Overdue Goals
+                    </a>
+                  </div>
+                  {% endif %} {% else %}
+                  <div class="text-center text-muted">
+                    <i class="fas fa-check-circle fa-3x mb-3"></i>
+                    <p>No overdue goals! Keep up the great work!</p>
+                  </div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Activity -->
+          <div class="card">
+            <div class="card-header">
+              <h5 class="card-title mb-0">
+                <i class="fas fa-history me-2"></i>Recent Progress Updates
+              </h5>
+            </div>
+            <div class="card-body">
+              {% if recent_progress %}
+              <div class="timeline">
+                {% for progress in recent_progress %}
+                <div class="timeline-item mb-3">
+                  <div class="d-flex">
+                    <div class="flex-shrink-0">
+                      <div
+                        class="avatar bg-primary rounded-circle d-flex align-items-center justify-content-center"
+                        style="width: 40px; height: 40px"
+                      >
+                        <i class="fas fa-chart-line text-white"></i>
+                      </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                      <div class="d-flex justify-content-between">
+                        <h6 class="mb-1">{{ progress.goal.title }}</h6>
+                        <small class="text-muted"
+                          >{{ progress.date|date:"M d, Y" }}</small
+                        >
+                      </div>
+                      <p class="mb-1">{{ progress.description }}</p>
+                      <div
+                        class="d-flex justify-content-between align-items-center"
+                      >
+                        <small class="text-muted">
+                          By {{
+                          progress.recorded_by.get_full_name|default:progress.recorded_by.username
+                          }}
+                        </small>
+                        <span class="badge bg-success"
+                          >{{ progress.completion_percentage }}%</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+              <div class="text-center">
+                <a
+                  href="{% url 'progress_tracking:goal_list' %}"
+                  class="btn btn-outline-primary"
+                >
+                  View All Goals
+                </a>
+              </div>
+              {% else %}
+              <div class="text-center text-muted">
+                <i class="fas fa-chart-line fa-3x mb-3"></i>
+                <p>No recent progress updates.</p>
+                <a
+                  href="{% url 'progress_tracking:progress_create' %}"
+                  class="btn btn-primary"
+                >
+                  Add Your First Progress Entry
+                </a>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

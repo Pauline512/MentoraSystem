@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Goals</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #f6f8fa;
+            font-family: 'Roboto', Arial, sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 24px 20px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 24px;
+        }
+        .create-btn {
+            display: inline-block;
+            margin-bottom: 24px;
+            padding: 10px 22px;
+            background: linear-gradient(90deg, #007bff 60%, #0056b3 100%);
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(0,123,255,0.08);
+            transition: background 0.2s;
+        }
+        .create-btn:hover {
+            background: linear-gradient(90deg, #0056b3 60%, #007bff 100%);
+        }
+        .goals-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            padding: 0;
+            list-style: none;
+        }
+        .goal-card {
+            background: #f9fafb;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(44,62,80,0.06);
+            padding: 22px 20px 16px 20px;
+            min-width: 260px;
+            max-width: 340px;
+            flex: 1 1 260px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border: 1px solid #e3e6ea;
+        }
+        .goal-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #007bff;
+            margin-bottom: 4px;
+        }
+        .goal-status {
+            font-size: 0.98rem;
+            color: #555;
+            margin-bottom: 2px;
+        }
+        .goal-date {
+            font-size: 0.95rem;
+            color: #888;
+            margin-bottom: 8px;
+        }
+        .goal-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .action-btn {
+            padding: 7px 14px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.97rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s, color 0.2s;
+        }
+        .view-btn {
+            background: #e9ecef;
+            color: #007bff;
+        }
+        .view-btn:hover {
+            background: #007bff;
+            color: #fff;
+        }
+        .edit-btn {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .edit-btn:hover {
+            background: #ffe082;
+            color: #856404;
+        }
+        .delete-btn {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .delete-btn:hover {
+            background: #f5c6cb;
+            color: #721c24;
+        }
+        .no-goals {
+            text-align: center;
+            color: #888;
+            font-size: 1.05rem;
+            margin-top: 32px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Your Goals</h1>
+        {% if user.mentee %}
+        <a class="create-btn" href="{% url 'progress_tracking:goal_create' %}">+ Create New Goal</a>
+        {% endif %}
+        <ul class="goals-list">
+            {% for goal in goals %}
+                <li class="goal-card">
+                    <div class="goal-title">{{ goal.title }}</div>
+                    <div class="goal-status">Status: {{ goal.status|capfirst }}</div>
+                    <div class="goal-date">Due: {{ goal.target_date }}</div>
+                    <div class="goal-actions">
+                        <a class="action-btn view-btn" href="{% url 'progress_tracking:goal_detail' goal.pk %}">View</a>
+                        <a class="action-btn edit-btn" href="{% url 'progress_tracking:goal_update' goal.pk %}">Edit</a>
+                        <a class="action-btn delete-btn" href="{% url 'progress_tracking:goal_delete' goal.pk %}">Delete</a>
+                    </div>
+                </li>
+            {% empty %}
+                <div class="no-goals">No goals found.</div>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>

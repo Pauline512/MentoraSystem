@@ -1,0 +1,189 @@
+{% load notification_extras %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Guidestar Connect Hub{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Color Palette */
+        :root {
+            --primary-dark-green: #1A7A3B;
+            --darker-green-hover: #156330;
+            --light-green-bg: #EBF5ED;
+            --yellow-icon: #FBC02D; /* Used for icons, pending status */
+            --dark-text: #343a40;
+            --light-text: #6c757d;
+            --white: #ffffff;
+            --light-gray-bg: #f8f9fa;
+            --border-color: #e9ecef;
+            --red-error: #dc3545;
+            --red-error-bg: #ffebee;
+            --red-error-text: #721c24;
+            --green-accepted: #28a745; /* A standard green for accepted status */
+            --orange-button: #FF8C00; /* Orange for Schedule/Message buttons */
+            --orange-button-hover: #CC7000;
+            --sidebar-blue: #007bff; /* New: Blue for sidebar */
+            --sidebar-blue-dark: #0056b3; /* New: Darker blue for hover */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light-gray-bg);
+            color: var(--dark-text);
+            line-height: 1.6;
+            display: flex; /* Use flexbox for layout */
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 250px; /* Fixed width for sidebar */
+            background-color: var(--sidebar-blue);
+            color: var(--white);
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            height: 100vh; /* Full height */
+            position: fixed; /* Fixed position */
+            top: 0;
+            left: 0;
+            overflow-y: auto; /* Scroll if content overflows */
+        }
+        .sidebar .logo {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: var(--white);
+            text-decoration: none;
+            display: block;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .sidebar .nav-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar .nav-links a,
+        .sidebar .nav-links button {
+            display: block;
+            color: var(--white);
+            text-decoration: none;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            transition: background-color 0.2s ease-in-out;
+            font-weight: 500;
+            width: 100%; /* Full width of sidebar */
+            text-align: left;
+            background: none; /* Remove default button background */
+            border: none; /* Remove default button border */
+            cursor: pointer;
+        }
+        .sidebar .nav-links a:hover,
+        .sidebar .nav-links button:hover {
+            background-color: var(--sidebar-blue-dark);
+        }
+        .sidebar .nav-links form {
+            margin-bottom: 10px;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            margin-left: 250px; /* Push content to the right of the sidebar */
+            flex-grow: 1; /* Take remaining space */
+            padding: 20px;
+            width: calc(100% - 250px); /* Adjust width */
+        }
+
+        /* Messages Styling (moved to main-content) */
+        .messages {
+            list-style-type: none; padding: 0; margin-bottom: 20px;
+        }
+        .messages li {
+            padding: 10px; border-radius: 4px; margin-bottom: 10px;
+        }
+        .messages .success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
+        .messages .error { background-color: var(--red-error-bg); color: var(--red-error-text); border-color: #f5c6cb; }
+        .messages .info { background-color: var(--light-green-bg); color: var(--primary-dark-green); border-color: #c3e6cb; }
+
+        /* Responsive (adjust for smaller screens if needed) */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            }
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <div class="sidebar">
+        <a href="{% url 'home' %}" class="logo">Guidestar Connect Hub</a>
+        <div class="nav-links">
+            {% if user.is_authenticated %}
+                {% if user.is_staff or user.is_superuser %} {# Admin #}
+                    <a href="{% url 'reports:index' %}">Reports</a>
+                    <a href="{% url 'resources:index' %}">Resources</a>
+                    <a href="{% url 'my_profile' %}">My Profile</a>
+                    <form action="{% url 'logout' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit">Logout</button>
+                    </form>
+                {% elif user.mentor %} {# Mentor #}
+                    <a href="{% url 'my_requests' %}">Requests</a>
+                    <a href="{% url 'progress_tracking:dashboard' %}">Progress Tracking</a>
+                    <a href="{% url 'resources:index' %}">Resources</a>
+                    <a href="{% url 'communication:index' %}">Messages</a>
+                    <a href="{% url 'my_notifications' %}">Notifications
+                        {% notification_badge %}
+                    </a>
+                    <a href="{% url 'my_profile' %}">My Profile</a>
+                    <form action="{% url 'logout' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit">Logout</button>
+                    </form>
+                {% elif user.mentee %} {# Mentee #}
+                    <a href="{% url 'mentor_list' %}">Find Mentors</a>
+                    <a href="{% url 'progress_tracking:dashboard' %}">Progress Tracking</a>
+                    <a href="{% url 'resources:index' %}">Resources</a>
+                    <a href="{% url 'communication:index' %}">Messages</a>
+                    <a href="{% url 'my_notifications' %}">Notifications
+                        {% notification_badge %}
+                    </a>
+                    <a href="{% url 'my_profile' %}">My Profile</a>
+                    <form action="{% url 'logout' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit">Logout</button>
+                    </form>
+                {% endif %}
+            {% else %} {# Not authenticated #}
+                <a href="{% url 'login' %}">Login</a>
+                <a href="{% url 'register' %}">Register</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="main-content">
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </div>
+</body>
+</html>

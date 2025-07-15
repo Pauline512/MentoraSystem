@@ -1,0 +1,514 @@
+{% extends 'mentorship/base.html' %}
+
+{% block extra_head %}
+    <title>Find Your Mentor - Guidestar Connect Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* General Body and Layout */
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            color: #343a40;
+            line-height: 1.6;
+        }
+        /* Navbar Styling */
+        .navbar {
+            background-color: #ffffff;
+            padding: 15px 40px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .navbar .logo {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #4CAF50; /* Primary Green */
+            text-decoration: none;
+        }
+        .navbar .nav-links a {
+            color: #4CAF50; /* Primary Green */
+            text-decoration: none;
+            margin-left: 25px;
+            font-weight: 500;
+            transition: color 0.2s ease-in-out;
+            position: relative;
+        }
+        .navbar .nav-links a:hover {
+            color: #45a049; /* Darker Green for hover */
+        }
+
+        /* Main Content Area (Sidebar + Mentor List) */
+        .main-content {
+            display: flex;
+            max-width: 1200px;
+            margin: 30px auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        /* Sidebar for Filters */
+        .sidebar {
+            flex: 0 0 280px;
+            padding: 30px;
+            background-color: #f8f9fa;
+            border-right: 1px solid #e9ecef;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            font-size: 1.3em;
+            color: #000000; /* Black for Search & Filters heading */
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        .sidebar h2 i {
+            margin-right: 10px;
+            color: #4CAF50; /* Icon in heading remains green */
+        }
+
+        .search-bar {
+            margin-bottom: 30px;
+        }
+        .search-bar input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+        .search-bar input::placeholder {
+            color: #6c757d;
+        }
+
+        .filter-section {
+            margin-bottom: 25px;
+        }
+        .filter-section h3 {
+            font-size: 1.1em;
+            color: #000000; /* Black for filter subheadings */
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+        }
+        .filter-section ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .filter-section ul li {
+            margin-bottom: 8px;
+        }
+        .filter-section ul li a {
+            text-decoration: none;
+            color: #4CAF50; /* Primary Green */
+            font-weight: 500;
+            transition: color 0.2s ease-in-out;
+            display: block;
+            padding: 2px 0;
+        }
+        .filter-section ul li a:hover {
+            color: #45a049; /* Darker Green for hover */
+            text-decoration: underline;
+        }
+        .filter-section .price-inputs,
+        .filter-section .availability-inputs {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .filter-section .price-inputs input,
+        .filter-section .availability-inputs input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        .filter-section .price-inputs span,
+        .filter-section .availability-inputs span {
+            color: #6c757d;
+        }
+        .filter-section button[type="submit"] {
+            background-color: #4CAF50; /* Primary Green */
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .filter-section button[type="submit"]:hover {
+            background-color: #45a049; /* Darker Green for hover */
+        }
+        .filter-section .clear-filters {
+            display: block;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #dc3545; /* Keep red for "Clear" for contrast */
+            text-decoration: none;
+        }
+        .filter-section .clear-filters:hover {
+            text-decoration: underline;
+        }
+
+
+        /* Mentor List Container */
+        .mentor-list-container {
+            flex-grow: 1;
+            padding: 30px;
+        }
+        .mentor-list-container h1 {
+            font-size: 1.8em;
+            color: #343a40;
+            margin-bottom: 25px;
+        }
+
+        /* Individual Mentor Card */
+        .mentor-card {
+            display: flex;
+            background-color: #ffffff;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .mentor-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #4CAF50; /* Primary Green */
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            font-weight: bold;
+            margin-right: 20px;
+            flex-shrink: 0;
+            text-transform: uppercase;
+        }
+        .mentor-info {
+            flex-grow: 1;
+            padding-right: 20px;
+        }
+        .mentor-info h2 {
+            margin: 0 0 5px 0;
+            font-size: 1.4em;
+            color: #343a40;
+        }
+        .mentor-info p {
+            margin: 0 0 5px 0;
+            font-size: 0.95em;
+            color: #6c757d;
+        }
+        .mentor-info .rating {
+            font-size: 0.9em;
+            color: #FBC02D; /* Yellow for stars */
+            margin-top: 5px;
+        }
+        .mentor-info .rating i {
+            margin-right: 3px;
+        }
+        .mentor-info .rating span {
+            color: #6c757d;
+            font-weight: 500;
+        }
+        .mentor-info .location i { /* Specific icon color for location within rating */
+            color: #FBC02D; /* Yellow for map marker icon */
+        }
+        .mentor-description {
+            font-size: 0.9em;
+            color: #555;
+            margin-top: 15px;
+            line-height: 1.5;
+            flex-basis: 100%;
+        }
+        .mentor-tags {
+            margin-top: 15px;
+            flex-basis: 100%;
+        }
+        .mentor-tags span {
+            display: inline-block;
+            background-color: #EBF5ED; /* Light Green for tags */
+            color: #4CAF50; /* Primary Green for tag text */
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+
+        .mentor-details-meta {
+            display: flex;
+            align-items: center;
+            margin-top: 15px;
+            gap: 20px;
+            flex-basis: 100%;
+            flex-wrap: wrap;
+        }
+        .mentor-details-meta div {
+            display: flex;
+            align-items: center;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        .mentor-details-meta div i {
+            margin-right: 8px;
+            color: #FBC02D; /* Yellow for meta icons */
+        }
+
+        .mentor-actions {
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 10px;
+            margin-left: auto;
+            padding-left: 20px;
+        }
+        .mentor-actions .price {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #343a40;
+            margin-bottom: 10px;
+        }
+        .mentor-actions .price span {
+            font-size: 0.8em;
+            font-weight: normal;
+            color: #6c757d;
+        }
+        .mentor-actions .btn {
+            display: block;
+            width: 100%;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.95em;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .mentor-actions .btn-primary {
+            background-color: #4CAF50; /* Primary Green */
+            color: white;
+        }
+        .mentor-actions .btn-primary:hover {
+            background-color: #45a049; /* Darker Green for hover */
+        }
+        .mentor-actions .btn-secondary {
+            background-color: #e9ecef;
+            color: #343a40;
+            border: 1px solid #ced4da;
+        }
+        .mentor-actions .btn-secondary:hover {
+            background-color: #dee2e6;
+        }
+
+        /* Messages Styling */
+        .messages {
+            list-style-type: none; padding: 0; margin-bottom: 20px;
+        }
+        .messages li {
+            padding: 10px; border-radius: 4px; margin-bottom: 10px;
+        }
+        .messages .success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; } /* Already good green */
+        .messages .error { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+        .messages .info { background-color: #EBF5ED; color: #4CAF50; border-color: #c3e6cb; } /* Light green for info */
+
+
+        /* Responsive adjustments */
+        @media (max-width: 992px) {
+            .main-content {
+                flex-direction: column;
+            }
+            .sidebar {
+                border-right: none;
+                border-bottom: 1px solid #e9ecef;
+                width: 100%;
+                flex: none;
+                order: 1;
+            }
+            .mentor-list-container {
+                order: 2;
+            }
+            .mentor-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .mentor-avatar {
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+            .mentor-info, .mentor-description, .mentor-tags, .mentor-details-meta {
+                padding-right: 0;
+                width: 100%;
+            }
+            .mentor-actions {
+                margin-left: 0;
+                margin-top: 20px;
+                width: 100%;
+                align-items: stretch;
+            }
+        }
+        @media (max-width: 576px) {
+            .navbar { padding: 10px 15px; }
+            .navbar .nav-links { display: none; }
+            .main-content { margin: 15px auto; }
+            .sidebar, .mentor-list-container { padding: 15px; }
+            .mentor-card { padding: 15px; }
+            .mentor-avatar { width: 60px; height: 60px; font-size: 1.5em; margin-bottom: 10px; }
+            .mentor-info h2 { font-size: 1.2em; }
+            .mentor-info p { font-size: 0.85em; }
+            .mentor-actions .price { font-size: 1.2em; }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="main-content">
+        <div class="sidebar">
+            <h2><i class="fas fa-filter"></i> Search & Filters</h2>
+            <form method="get" action="{% url 'mentor_list' %}">
+                <div class="search-bar">
+                    <input type="text" name="q" placeholder="Search mentors by name, co..." value="{{ current_q }}">
+                </div>
+
+                <div class="filter-section">
+                    <h3>Expertise</h3>
+                    <ul>
+                        {% for expertise_option in all_expertise_options %}
+                            <li><a href="{% url 'mentor_list' %}?expertise={{ expertise_option.name|urlencode }}&q={{ current_q|urlencode }}&location={{ current_location|urlencode }}&min_price={{ current_min_price }}&max_price={{ current_max_price }}&available_date={{ current_available_date|urlencode }}&available_time={{ current_available_time|urlencode }}">{{ expertise_option.name }}</a></li>
+                        {% endfor %}
+                        {% if current_expertise %}
+                            <li><a href="{% url 'mentor_list' %}?q={{ current_q|urlencode }}&location={{ current_location|urlencode }}&min_price={{ current_min_price }}&max_price={{ current_max_price }}&available_date={{ current_available_date|urlencode }}&available_time={{ current_available_time|urlencode }}" class="clear-filters" style="margin-top: 10px;">Clear Expertise</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                <div class="filter-section">
+                    <h3>Location</h3>
+                    <ul>
+                        {% for location_option in all_location_options %}
+                            <li><a href="{% url 'mentor_list' %}?location={{ location_option|urlencode }}&q={{ current_q|urlencode }}&expertise={{ current_expertise|urlencode }}&min_price={{ current_min_price }}&max_price={{ current_max_price }}&available_date={{ current_available_date|urlencode }}&available_time={{ current_available_time|urlencode }}">{{ location_option }}</a></li>
+                        {% endfor %}
+                        {% if current_location %}
+                            <li><a href="{% url 'mentor_list' %}?q={{ current_q|urlencode }}&expertise={{ current_expertise|urlencode }}&min_price={{ current_min_price }}&max_price={{ current_max_price }}&available_date={{ current_available_date|urlencode }}&available_time={{ current_available_time|urlencode }}" class="clear-filters" style="margin-top: 10px;">Clear Location</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                <div class="filter-section">
+                    <h3>Price Range</h3>
+                    <div class="price-inputs">
+                        <span>$</span><input type="number" name="min_price" placeholder="Min" value="{{ current_min_price }}">
+                        <span>-</span>
+                        <span>$</span><input type="number" name="max_price" placeholder="Max" value="{{ current_max_price }}">
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <h3>Availability</h3>
+                    <div class="availability-inputs">
+                        <input type="text" name="available_date" placeholder="Date (e.g., YYYY-MM-DD)" value="{{ current_available_date }}">
+                        <input type="time" name="available_time" placeholder="Time" value="{{ current_available_time }}">
+                    </div>
+                </div>
+
+                <button type="submit">Apply Filters</button>
+                {% if current_q or current_expertise or current_location or current_min_price or current_max_price or current_available_date or current_available_time %}
+                    <a href="{% url 'mentor_list' %}" class="clear-filters">Clear All Filters</a>
+                {% endif %}
+            </form>
+        </div>
+
+        <div class="mentor-list-container">
+            {% if messages %}
+                <ul class="messages">
+                    {% for message in messages %}
+                        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            <h1>{{ mentors|length }} Mentors Found</h1>
+
+            {% if mentors %}
+                {% for mentor in mentors %}
+                    <div class="mentor-card">
+                        <div class="mentor-avatar">
+                            {% if mentor.user.first_name and mentor.user.last_name %}
+                                {{ mentor.user.first_name|first }}{{ mentor.user.last_name|first }}
+                            {% else %}
+                                {{ mentor.user.username|first }}
+                            {% endif %}
+                        </div>
+                        <div class="mentor-info">
+                            <h2><a href="{% url 'mentor_detail' pk=mentor.pk %}" style="text-decoration: none; color: inherit;">
+                                {% if mentor.user.first_name and mentor.user.last_name %}
+                                    {{ mentor.user.first_name }} {{ mentor.user.last_name }}
+                                {% else %}
+                                    {{ mentor.user.username }}
+                                {% endif %}
+                            </a></h2>
+                            <p>{% if mentor.title %}{{ mentor.title }}{% if mentor.company %} at {{ mentor.company }}{% endif %}{% elif mentor.company %}{{ mentor.company }}{% endif %}</p>
+                            <div class="rating">
+                                {% if mentor.rating %}
+                                    <i class="fas fa-star"></i> {{ mentor.rating|floatformat:1 }} ({{ mentor.reviews_count }})
+                                {% else %}
+                                    <i class="far fa-star"></i> No ratings yet
+                                {% endif %}
+                                {% if mentor.location %}
+                                    <span class="location"><i class="fas fa-map-marker-alt"></i> {{ mentor.location }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="mentor-actions">
+                            {% if mentor.price_per_session %}
+                                <div class="price">${{ mentor.price_per_session|floatformat:0 }}<span>/session</span></div>
+                            {% else %}
+                                <div class="price">Price N/A</div>
+                            {% endif %}
+                            <a href="{% url 'request_mentorship' mentor_pk=mentor.pk %}" class="btn btn-primary">Request Mentorship</a>
+                            <button class="btn btn-secondary">Schedule Meeting</button>
+                        </div>
+                        <div class="mentor-description">
+                            {{ mentor.bio|truncatechars:150 }}
+                        </div>
+                        <div class="mentor-tags">
+                            {% for interest in mentor.expertise.all %}
+                                <span>{{ interest.name }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="mentor-details-meta">
+                            {% if mentor.availability %}
+                                <div><i class="fas fa-calendar-alt"></i> {{ mentor.availability }}</div>
+                            {% endif %}
+                            {% if mentor.experience_years %}
+                                <div><i class="fas fa-briefcase"></i> {{ mentor.experience_years }}+ years experience</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p style="text-align: center; color: #6c757d; padding: 50px;">No mentors found matching your criteria. Try adjusting your filters!</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

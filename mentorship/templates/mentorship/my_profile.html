@@ -1,0 +1,61 @@
+{% extends 'mentorship/base.html' %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>My Profile</h1>
+
+    <div class="profile-details">
+        <p><strong>Username:</strong> {{ user_obj.username }}</p>
+        <p><strong>Role:</strong> {{ role }}</p>
+
+        {% if role == 'Mentor' %}
+            <p><strong>Pending Requests:</strong> {{ pending_requests_count }}</p>
+            <p><strong>Sessions Had:</strong> {{ completed_sessions_count }}</p>
+            <p><strong>Mentees Interacted With:</strong> 
+                {% if mentees_interacted %}
+                    {{ mentees_interacted|join:", " }}
+                {% else %}
+                    None
+                {% endif %}
+            </p>
+        {% elif role == 'Mentee' %}
+            <p><strong>Sessions Had:</strong> {{ completed_sessions_count }}</p>
+            <p><strong>Mentors Interacted With:</strong> 
+                {% if mentors_interacted %}
+                    {{ mentors_interacted|join:", " }}
+                {% else %}
+                    None
+                {% endif %}
+            </p>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .container {
+        max-width: 800px;
+        margin: 30px auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+        color: #333;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+    }
+    .profile-details p {
+        margin-bottom: 10px;
+        line-height: 1.6;
+    }
+    .profile-details strong {
+        color: #555;
+        display: inline-block;
+        width: 180px; /* Adjust as needed for alignment */
+    }
+</style>
+{% endblock %}

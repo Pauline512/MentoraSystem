@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Goal Detail</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #f6f8fa;
+            font-family: 'Roboto', Arial, sans-serif;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 28px 24px 20px 24px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 18px;
+        }
+        .goal-detail {
+            background: #f9fafb;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(44,62,80,0.06);
+            padding: 20px 18px 14px 18px;
+            margin-bottom: 24px;
+            border: 1px solid #e3e6ea;
+        }
+        .goal-detail p {
+            margin: 8px 0;
+            font-size: 1.04rem;
+            color: #34495e;
+        }
+        .goal-detail strong {
+            color: #007bff;
+        }
+        h2 {
+            color: #007bff;
+            margin-top: 18px;
+            margin-bottom: 12px;
+            font-size: 1.15rem;
+        }
+        .progress-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .progress-entry {
+            background: #e9ecef;
+            border-radius: 7px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 0.99rem;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        }
+        .no-progress {
+            color: #888;
+            text-align: center;
+            margin: 18px 0 0 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 18px;
+            padding: 8px 18px;
+            background: #e9ecef;
+            color: #007bff;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.2s, color 0.2s;
+        }
+        .back-link:hover {
+            background: #007bff;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{{ goal.title }}</h1>
+        <div class="goal-detail">
+            <p><strong>Status:</strong> {{ goal.status|capfirst }}</p>
+            <p><strong>Description:</strong> {{ goal.description }}</p>
+            <p><strong>Priority:</strong> {{ goal.priority|capfirst }}</p>
+            <p><strong>Target Date:</strong> {{ goal.target_date }}</p>
+            <p><strong>Progress:</strong> {{ goal.progress_percentage }}%</p>
+        </div>
+        <h2>Progress Entries</h2>
+        <ul class="progress-list">
+            {% for entry in progress_entries %}
+                <li class="progress-entry">
+                    <strong>{{ entry.date }}</strong>: {{ entry.completion_percentage }}% - {{ entry.description }}
+                </li>
+            {% empty %}
+                <li class="no-progress">No progress entries yet.</li>
+            {% endfor %}
+        </ul>
+        {% if user.mentor %}
+        <a class="back-link" href="{% url 'progress_tracking:progress_create' %}">Add Progress Entry</a>
+        {% endif %}
+        <a class="back-link" href="{% url 'progress_tracking:goal_list' %}">Back to Goals</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,176 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Unified Report{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center">
+        <h1>Unified Report</h1>
+        <div>
+            <a href="?format=csv" class="btn btn-primary"><i class="fas fa-download me-2"></i>Download CSV</a>
+            <a href="?format=pdf" class="btn btn-secondary"><i class="fas fa-download me-2"></i>Download PDF</a>
+        </div>
+    </div>
+    <p>This report provides a comprehensive overview of the mentorship program.</p>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card text-center bg-primary text-white mb-4">
+                <div class="card-body">
+                    <i class="fas fa-users fa-3x mb-2"></i>
+                    <h5 class="card-title">Active Users</h5>
+                    <p class="card-text display-4">{{ active_users }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center bg-success text-white mb-4">
+                <div class="card-body">
+                    <i class="fas fa-check-circle fa-3x mb-2"></i>
+                    <h5 class="card-title">Completed Sessions</h5>
+                    <p class="card-text display-4">{{ completed_sessions }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center bg-info text-white mb-4">
+                <div class="card-body">
+                    <i class="fas fa-calendar-alt fa-3x mb-2"></i>
+                    <h5 class="card-title">Total Sessions</h5>
+                    <p class="card-text display-4">{{ total_sessions }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">Session Trends</div>
+                <div class="card-body">
+                    <canvas id="sessionTrendsChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">Feedback Ratings (Mentor)</div>
+                <div class="card-body">
+                    <canvas id="mentorRatingsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <h2>Mentorship Sessions</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Mentor</th>
+                        <th>Mentee</th>
+                        <th>Topic</th>
+                        <th>Scheduled Time</th>
+                        <th>Duration (minutes)</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for session in sessions %}
+                    <tr>
+                        <td>{{ session.mentorship.mentor.username }}</td>
+                        <td>{{ session.mentorship.mentee.username }}</td>
+                        <td>{{ session.topic }}</td>
+                        <td>{{ session.scheduled_time }}</td>
+                        <td>{{ session.duration_minutes }}</td>
+                        <td>{% if session.is_confirmed %}Confirmed{% else %}Pending{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <h2>Feedback Ratings</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Mentor</th>
+                        <th>Mentee</th>
+                        <th>Mentor Rating</th>
+                        <th>Mentee Rating</th>
+                        <th>Comments</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for feedback in feedback_entries %}
+                    <tr>
+                        <td>{{ feedback.session.mentorship.mentor.username }}</td>
+                        <td>{{ feedback.session.mentorship.mentee.username }}</td>
+                        <td>{{ feedback.mentor_rating }}</td>
+                        <td>{{ feedback.mentee_rating }}</td>
+                        <td>{{ feedback.comments }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Session Trends Chart
+        var sessionTrendsCtx = document.getElementById('sessionTrendsChart').getContext('2d');
+        var sessionTrendsChart = new Chart(sessionTrendsCtx, {
+            type: 'line',
+            data: {
+                labels: {{ session_trends_labels|safe }},
+                datasets: [{
+                    label: 'Number of Sessions',
+                    data: {{ session_trends_data|safe }},
+                    backgroundColor: 'rgba(2, 117, 216, 0.2)',
+                    borderColor: 'rgba(2, 117, 216, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Mentor Ratings Chart
+        var mentorRatingsCtx = document.getElementById('mentorRatingsChart').getContext('2d');
+        var mentorRatingsChart = new Chart(mentorRatingsCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ mentor_rating_labels|safe }},
+                datasets: [{
+                    label: 'Mentor Ratings',
+                    data: {{ mentor_rating_data|safe }},
+                    backgroundColor: 'rgba(40, 167, 69, 0.2)',
+                    borderColor: 'rgba(40, 167, 69, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

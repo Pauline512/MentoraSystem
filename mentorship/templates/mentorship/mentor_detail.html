@@ -1,0 +1,87 @@
+<!-- mentor_detail.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mentor Profile: {{ mentor.user.username }}</title>
+    <style>
+        /* styling for the profile page */
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; line-height: 1.6; }
+        .container {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 800px;
+            margin: 20px auto;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 { color: #0056b3; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0;}
+        h2 { color: #333; }
+        p { color: #555; }
+        strong { color: #000; }
+        .back-link { display: block; margin-top: 20px; color: #007bff; text-decoration: none; }
+        .back-link:hover { text-decoration: underline; }
+        .request-button {
+        display: inline-block;
+        background-color: #007bff; /* Blue button */
+        color: white;
+        padding: 10px 15px;
+        border-radius: 5px;
+        text-decoration: none;
+        margin-top: 15px;
+    }
+    .request-button:hover {
+        background-color: #0056b3;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mentor Profile: {{ mentor.user.username }}</h1>
+        <p>
+            <strong>Expertise:</strong>
+                {% for interest in mentor.expertise.all %}
+                    {{ interest.name }}{% if not forloop.last %}, {% endif %} {# Add comma if not the last one #}
+                    {% empty %} {# If there are no expertise tags #}
+                            N/A
+                {% endfor %}
+        </p>
+        <p><strong>About Me:</strong></p>
+        <p>{{ mentor.bio }}</p>
+
+        <div>
+            {# Show different actions based on user's login and request status #}
+            {% if user.is_authenticated %}
+                {% if mentee_has_pending_request %}
+                    <span class="info-message">You have a PENDING request with this mentor.</span>
+                    <a href="{% url 'my_requests' %}" class="request-button" style="background-color: #ffc107;">View My Requests</a>
+                {% else %}
+                    <a href="{% url 'request_mentorship' mentor_pk=mentor.pk %}" class="request-button">Request Mentorship</a>
+                {% endif %}
+
+                {% if messages %}
+                    <div class="container">
+                        {# This is where any "sticky notes" for the student will appear on this page. #}
+                        <ul class="messages">
+                        {% for message in messages %}
+                            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            
+            {% else %}
+                <p class="info-message">Please <a href="{% url 'login' %}">log in</a> to request mentorship.</p>
+            {% endif %}
+
+            <a href="{% url 'mentor_list' %}" class="back-link">&larr; Back to Mentor List</a>
+        </div>
+   
+
+        {# link back to the mentor list #}
+        <a href="{% url 'mentor_list' %}" class="back-link">&larr; Back to Mentor List</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,287 @@
+<!-- message_thread.html -->
+
+{% load notification_extras %}  {# manually loading the notification_badge #}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Message with {{ recipient_user.username }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Color Palette  */
+        :root {
+            --primary-dark-green: #1A7A3B;
+            --darker-green-hover: #156330;
+            --light-green-bg: #EBF5ED;
+            --yellow-accent: #FBC02D;
+            --dark-text: #343a40;
+            --light-text: #6c757d;
+            --white: #ffffff;
+            --light-gray-bg: #f8f9fa;
+            --border-color: #e9ecef;
+            --red-error: #dc3545;
+            --red-error-bg: #ffebee;
+            --red-error-text: #721c24;
+            --orange-button: #FF8C00;
+            --orange-button-hover: #CC7000;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light-gray-bg);
+            color: var(--dark-text);
+            line-height: 1.6;
+        }
+        .navbar {
+            background-color: var(--white);
+            padding: 15px 40px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .navbar .logo {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--primary-dark-green);
+            text-decoration: none;
+        }
+        .navbar .nav-links a {
+            color: var(--primary-dark-green);
+            text-decoration: none;
+            margin-left: 25px;
+            font-weight: 500;
+            transition: color 0.2s ease-in-out;
+        }
+        .navbar .nav-links a:hover {
+            color: var(--darker-green-hover);
+        }
+
+        .message-container {
+            max-width: 800px; /* Wider for chat interface */
+            margin: 30px auto;
+            padding: 20px;
+            background-color: var(--white);
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 120px); 
+        }
+        h1 {
+            color: var(--primary-dark-green);
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 2em;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+        .message-context {
+            text-align: center;
+            color: var(--light-text);
+            margin-bottom: 20px;
+            font-size: 0.95em;
+        }
+
+        /* Message Thread */
+        .message-thread {
+            flex-grow: 1; /* Takes up available space */
+            overflow-y: auto; /* Scroll if messages overflow */
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--light-gray-bg);
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column; /* Stack messages vertically */
+            gap: 10px;
+        }
+        .message-item {
+            display: flex;
+            align-items: flex-end;
+            max-width: 80%; /* Messages don't take full width */
+            padding: 10px 15px;
+            border-radius: 15px;
+            line-height: 1.4;
+            position: relative;
+        }
+        .message-item.sent {
+            background-color: var(--primary-dark-green); /* Dark green for sent messages */
+            color: var(--white);
+            align-self: flex-end; /* Align to right */
+            border-bottom-right-radius: 2px; /* Pointy corner */
+        }
+        .message-item.received {
+            background-color: var(--white); /* White for received messages */
+            color: var(--dark-text);
+            align-self: flex-start; /* Align to left */
+            border: 1px solid var(--border-color);
+            border-bottom-left-radius: 2px; /* Pointy corner */
+        }
+        .message-item .content {
+            flex-grow: 1;
+        }
+        .message-item .timestamp {
+            font-size: 0.75em;
+            color: rgba(255, 255, 255, 0.7); /* Lighter for dark background */
+            margin-left: 10px;
+            white-space: nowrap;
+        }
+        .message-item.received .timestamp {
+            color: var(--light-text);
+        }
+        .no-messages {
+            text-align: center;
+            color: var(--light-text);
+            padding: 20px;
+        }
+
+        /* Message Input Form */
+        .message-input-form {
+            display: flex;
+            gap: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-color);
+        }
+        .message-input-form textarea {
+            flex-grow: 1;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 25px; /* Pill shape */
+            font-size: 1em;
+            resize: none; /* No resizing */
+            min-height: 45px;
+            max-height: 120px; /* Limit height */
+            box-sizing: border-box;
+            transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        .message-input-form textarea:focus {
+            border-color: var(--yellow-accent); /* Yellow border on focus */
+            box-shadow: 0 0 0 3px rgba(251, 192, 45, 0.3); /* Yellow glow */
+            outline: none;
+        }
+        .message-input-form button {
+            background-color: var(--yellow-accent); /* Yellow send button */
+            color: var(--dark-text); /* Dark text on yellow */
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px; /* Pill shape */
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+            white-space: nowrap;
+        }
+        .message-input-form button:hover {
+            background-color: #DDAA00; /* Darker yellow */
+        }
+
+        /* Back Link */
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .back-link a {
+            color: var(--primary-dark-green);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease-in-out;
+        }
+        .back-link a:hover {
+            text-decoration: underline;
+            color: var(--darker-green-hover);
+        }
+
+        /* Messages Styling (for Django messages) */
+        .messages {
+            list-style-type: none; padding: 0; margin-bottom: 20px;
+        }
+        .messages li {
+            padding: 10px; border-radius: 4px; margin-bottom: 10px;
+        }
+        .messages .success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
+        .messages .error { background-color: var(--red-error-bg); color: var(--red-error-text); border-color: #f5c6cb; }
+        .messages .info { background-color: var(--light-green-bg); color: var(--primary-dark-green); border-color: #c3e6cb; }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .message-container {
+                margin: 15px;
+                padding: 15px;
+                min-height: calc(100vh - 80px);
+            }
+            h1 { font-size: 1.8em; }
+            .message-input-form { flex-direction: column; }
+            .message-input-form button { width: 100%; }
+            .message-item { max-width: 95%; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="{% url 'home' %}" class="logo">Guidestar Connect Hub</a>
+        <div class="nav-links">
+            {% if user.is_authenticated %}
+                <a href="{% url 'mentor_list' %}">Find Mentors</a>
+                <a href="{% url 'mentee_dashboard' %}">My Dashboard</a>
+                <a href="{% url 'my_requests' %}">My Requests</a>
+                <a href="{% url 'my_notifications' %}">
+                    My Notifications
+                    {% notification_badge %}
+                </a>
+                <a href="#">My Profile</a>
+                <form action="{% url 'logout' %}" method="post" style="display: inline;">
+    {% csrf_token %}
+    <button type="submit" style="background: none; border: none; color: inherit; cursor: pointer; font-size: 1em; padding: 0;">Logout</button>
+</form>
+            {% else %}
+                <a href="{% url 'login' %}">Login</a>
+                <a href="{% url 'register' %}">Register</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="message-container">
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <h1>Chat with {{ recipient_user.username }}</h1>
+        <p class="message-context">About request to {{ mentorship_request.mentor.user.username }} from {{ mentorship_request.mentee.user.username }} (Status: {{ mentorship_request.get_status_display }})</p>
+
+        <div class="message-thread">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="message-item {% if message.sender == current_user %}sent{% else %}received{% endif %}">
+                        <div class="content">{{ message.content }}</div>
+                        <div class="timestamp">{{ message.timestamp|date:"H:i" }}</div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="no-messages">No messages yet. Start the conversation!</p>
+            {% endif %}
+        </div>
+
+        <form method="post" class="message-input-form">
+            {% csrf_token %}
+            {{ form.content }} {# Render only the content field of the form #}
+            <button type="submit">Send <i class="fas fa-paper-plane"></i></button>
+        </form>
+
+        <div class="back-link">
+            <a href="{% url 'mentee_dashboard' %}">&larr; Back to Dashboard</a>
+        </div>
+    </div>
+</body>
+</html>

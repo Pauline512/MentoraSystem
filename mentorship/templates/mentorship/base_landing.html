@@ -1,0 +1,94 @@
+{% load notification_extras %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Guidestar Connect Hub{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            color: #343a40;
+            line-height: 1.6;
+        }
+
+        /* Top Navbar Styling */
+        .top-navbar {
+            background-color: #ffffff;
+            padding: 15px 40px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .top-navbar .logo {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #007bff;
+            text-decoration: none;
+        }
+        .top-navbar .nav-links a {
+            color: #007bff;
+            text-decoration: none;
+            margin-left: 25px;
+            font-weight: 500;
+            transition: color 0.2s ease-in-out;
+        }
+        .top-navbar .nav-links a:hover {
+            color: #0056b3;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            padding: 20px;
+        }
+
+        /* Messages Styling */
+        .messages {
+            list-style-type: none; padding: 0; margin-bottom: 20px;
+        }
+        .messages li {
+            padding: 10px; border-radius: 4px; margin-bottom: 10px;
+        }
+        .messages .success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
+        .messages .error { background-color: #ffebee; color: #721c24; border-color: #f5c6cb; }
+        .messages .info { background-color: #eBF5ED; color: #1A7A3B; border-color: #c3e6cb; }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .top-navbar { padding: 15px 20px; }
+            .top-navbar .nav-links { display: none; } /* Could add a hamburger menu here */
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <nav class="top-navbar">
+        <a href="{% url 'home' %}" class="logo">Guidestar Connect Hub</a>
+        <div class="nav-links">
+            <a href="{% url 'login' %}">Login</a>
+            <a href="{% url 'register' %}">Register</a>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </div>
+</body>
+</html>

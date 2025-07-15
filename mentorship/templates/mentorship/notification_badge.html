@@ -1,0 +1,28 @@
+<!-- notification_badge.html  -->
+<style>
+    /* Styling for the notification badge */
+    .notification-badge {
+        background-color: #dc3545; /* Red color */
+        color: white;
+        border-radius: 50%; /* Makeing it a circle */
+        padding: 2px 7px;
+        font-size: 0.75em;
+        font-weight: bold;
+        position: relative; /* For positioning relative to its parent link */
+        top: -8px; /* Adjust vertical position */
+        left: 5px; /* Adjust horizontal position */
+        white-space: nowrap; /* Prevent number from wrapping */
+        min-width: 20px; /* Ensuring it's always a circle */
+        text-align: center;
+        display: inline-block; /* Making it behave like a block for width/height */
+        line-height: 1.2; /* Center text vertically */
+    }
+    .notification-badge.hidden {
+        display: none; /* Hide if count is zero */
+    }
+</style>
+
+{# If the count is greater than zero, display the red circle #}
+{% if unread_count > 0 %}
+    <span class="notification-badge">{{ unread_count }}</span>
+{% endif %}

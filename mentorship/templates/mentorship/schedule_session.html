@@ -1,0 +1,277 @@
+<!--schedule_session.html -->
+
+{% load notification_extras %}  {# manually loading the notification_badge #}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule Session</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Color Palette */
+        :root {
+            --primary-dark-green: #1A7A3B;
+            --darker-green-hover: #156330;
+            --light-green-bg: #EBF5ED;
+            --yellow-accent: #FBC02D; /* Used for accents */
+            --dark-text: #343a40;
+            --light-text: #6c757d;
+            --white: #ffffff;
+            --light-gray-bg: #f8f9fa;
+            --border-color: #e9ecef;
+            --red-error: #dc3545;
+            --red-error-bg: #ffebee;
+            --red-error-text: #721c24;
+            --orange-button: #FF8C00;
+            --orange-button-hover: #CC7000;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light-gray-bg);
+            color: var(--dark-text);
+            line-height: 1.6;
+        }
+        .navbar {
+            background-color: var(--white);
+            padding: 15px 40px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .navbar .logo {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--primary-dark-green);
+            text-decoration: none;
+        }
+        .navbar .nav-links a {
+            color: var(--primary-dark-green);
+            text-decoration: none;
+            margin-left: 25px;
+            font-weight: 500;
+            transition: color 0.2s ease-in-out;
+        }
+        .navbar .nav-links a:hover {
+            color: var(--darker-green-hover);
+        }
+
+        /* Fancy Container for the Form */
+        .container {
+            max-width: 650px;
+            margin: 50px auto;
+            padding: 40px;
+            background: linear-gradient(145deg, var(--white), #f0f0f0);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease-in-out;
+        }
+        .container:hover {
+            transform: translateY(-5px);
+        }
+
+        h1 {
+            color: var(--primary-dark-green);
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 2.2em;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
+        }
+        .container > p { /* Specific for the introductory paragraph */
+            text-align: center;
+            color: var(--light-text);
+            margin-bottom: 35px;
+            font-size: 1.1em;
+        }
+
+        /* Form Styling */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .form-group {
+            margin-bottom: 5px;
+        }
+        form label {
+            font-weight: 600;
+            color: var(--dark-text); /* Default label color */
+            margin-bottom: 8px;
+            display: block;
+            font-size: 0.95em;
+            transition: color 0.2s ease-in-out; /* Smooth transition for label color */
+        }
+        /* Yellow accent for labels when their associated input is focused */
+        form input[type="datetime-local"]:focus + label,
+        form select:focus + label,
+        form textarea:focus + label {
+            color: var(--yellow-accent); /* Yellow label on focus */
+        }
+        /* This selector is tricky because label is before input.
+           A better way would be to wrap label and input in a div.form-field
+           and apply focus-within to the form-field.
+           For now, let's apply yellow to the labels themselves. */
+        .form-group label {
+            /* This targets the label directly within form-group */
+            /* We'll use JS later or a more complex CSS structure for focus-based label color change.
+               For a simpler CSS-only approach, we can make labels yellow by default. */
+            color: var(--primary-dark-green); /* Making labels green by default */
+            font-weight: 700; /* Make them bolder */
+        }
+
+
+        form input[type="datetime-local"],
+        form select,
+        form textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1em;
+            color: var(--dark-text);
+            background-color: var(--light-gray-bg);
+            transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        form input[type="datetime-local"]:focus,
+        form select:focus,
+        form textarea:focus {
+            border-color: var(--yellow-accent); /* Yellow border on focus */
+            box-shadow: 0 0 0 3px rgba(251, 192, 45, 0.3); /* Yellow glow on focus */
+            outline: none;
+        }
+        form textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Submit Button */
+        form button[type="submit"] {
+            background: linear-gradient(45deg, var(--primary-dark-green), var(--darker-green-hover));
+            color: var(--white);
+            padding: 15px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(26, 122, 59, 0.3);
+            transition: all 0.3s ease-in-out;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-top: 25px;
+        }
+        form button[type="submit"]:hover {
+            background: linear-gradient(45deg, var(--darker-green-hover), var(--primary-dark-green));
+            box-shadow: 0 7px 20px rgba(26, 122, 59, 0.4);
+            transform: translateY(-2px);
+        }
+        form button[type="submit"]:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(26, 122, 59, 0.2);
+        }
+
+        /* Back Link */
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 30px;
+        }
+        .back-link a {
+            color: var(--primary-dark-green);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease-in-out;
+        }
+        .back-link a:hover {
+            text-decoration: underline;
+            color: var(--darker-green-hover);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                margin: 30px 15px;
+                padding: 25px;
+            }
+            h1 { font-size: 1.8em; }
+            .container > p { font-size: 1em; }
+            form button[type="submit"] { padding: 12px 15px; font-size: 1em; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="{% url 'home' %}" class="logo">Guidestar Connect Hub</a>
+        <div class="nav-links">
+            {% if user.is_authenticated %}
+                <a href="{% url 'mentor_list' %}">Find Mentors</a>
+                <a href="{% url 'mentee_dashboard' %}">My Dashboard</a>
+                <a href="{% url 'my_requests' %}">My Requests</a>
+                <a href="{% url 'my_notifications' %}">
+                    My Notifications
+                    {% notification_badge %}
+                </a>
+                <a href="#">My Profile</a>
+                <form action="{% url 'logout' %}" method="post" style="display: inline;">
+    {% csrf_token %}
+    <button type="submit" style="background: none; border: none; color: inherit; cursor: pointer; font-size: 1em; padding: 0;">Logout</button>
+</form>
+            {% else %}
+                <a href="{% url 'login' %}">Login</a>
+                <a href="{% url 'register' %}">Register</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Schedule Session with {{ mentorship_request.mentor.user.username }}</h1>
+        <p>For request from {{ mentorship_request.mentee.user.username }} (Status: {{ mentorship_request.get_status_display }})</p>
+
+        <form method="post">
+            {% csrf_token %}
+            {# In a real app, you'd render a Django form here, e.g., {{ form.as_p }} #}
+            <div class="form-group">
+                <label for="id_start_time">Start Time:</label>
+                <input type="datetime-local" id="id_start_time" name="start_time" required>
+            </div>
+
+            <div class="form-group">
+                <label for="id_end_time">End Time:</label>
+                <input type="datetime-local" id="id_end_time" name="end_time" required>
+            </div>
+
+            <div class="form-group">
+                <label for="id_session_type">Session Type:</label>
+                <select id="id_session_type" name="session_type" required>
+                    <option value="VIDEO_CALL">Video Call</option>
+                    <option value="PHONE_CALL">Phone Call</option>
+                    <option value="CHAT">Chat</option>
+                    <option value="IN_PERSON">In Person</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="id_location_details">Location Details (e.g., Zoom link, phone #, address):</label>
+                <textarea id="id_location_details" name="location_details" rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="id_notes">Notes:</label>
+                <textarea id="id_notes" name="notes" rows="3"></textarea>
+            </div>
+
+            <button type="submit">Schedule Session</button>
+        </form>
+        <div class="back-link">
+            <a href="{% url 'mentee_dashboard' %}">&larr; Back to Dashboard</a>
+        </div>
+    </div>
+</body>
+</html>

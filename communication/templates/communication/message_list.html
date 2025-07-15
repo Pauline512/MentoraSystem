@@ -1,0 +1,121 @@
+{% extends 'mentorship/base.html' %}
+
+{% block title %}Messages{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Your Conversations</h1>
+
+    {% if conversations %}
+        <div class="conversation-list">
+            {% for convo in conversations %}
+                <div class="conversation-item">
+                    <div class="conversation-header">
+                        <h2>
+                            Conversation with: {{ convo.other_party.get_full_name|default:convo.other_party.username }}
+                        </h2>
+                        <span class="request-info">
+                            (Request for: {{ convo.request.mentor.user.username }} by {{ convo.request.mentee.user.username }})
+                        </span>
+                    </div>
+                    <div class="conversation-body">
+                        {% if convo.last_message %}
+                            <p class="last-message-snippet">
+                                <strong>{{ convo.last_message.sender.username }}:</strong> {{ convo.last_message.content|truncatechars:100 }}
+                            </p>
+                            <span class="last-message-time">{{ convo.last_message.timestamp|date:"M d, Y H:i" }}</span>
+                        {% else %}
+                            <p class="no-messages">No messages yet in this conversation.</p>
+                        {% endif %}
+                    </div>
+                    <div class="conversation-actions">
+                        <a href="{% url 'message_thread' request_pk=convo.request.pk recipient_pk=convo.other_party.pk %}" class="btn btn-primary">View Thread</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>You have no active conversations.</p>
+    {% endif %}
+</div>
+
+<style>
+    .container {
+        max-width: 900px;
+        margin: 30px auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+        color: #333;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+    }
+    .conversation-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    .conversation-item {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        background-color: #f9f9f9;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .conversation-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    .conversation-header h2 {
+        margin: 0;
+        font-size: 1.2em;
+        color: #007bff;
+    }
+    .request-info {
+        font-size: 0.85em;
+        color: #666;
+    }
+    .conversation-body {
+        font-size: 0.9em;
+        color: #555;
+    }
+    .last-message-snippet {
+        margin: 0;
+        font-style: italic;
+    }
+    .last-message-time {
+        font-size: 0.8em;
+        color: #888;
+        text-align: right;
+        display: block;
+        margin-top: 5px;
+    }
+    .no-messages {
+        color: #888;
+        font-style: italic;
+    }
+    .conversation-actions {
+        text-align: right;
+    }
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+        padding: 8px 15px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-size: 0.9em;
+        transition: background-color 0.2s ease;
+    }
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+</style>
+{% endblock %}

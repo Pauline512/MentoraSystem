@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Progress Entry Detail</title>
+</head>
+<body>
+    <div style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px;">
+        <h1>Progress Entry for "{{ progress_entry.goal.title }}"</h1>
+        <p><strong>Date:</strong> {{ progress_entry.date }}</p>
+        <p><strong>Recorded by:</strong> {{ progress_entry.recorded_by.get_full_name|default:progress_entry.recorded_by.username }}</p>
+        <p><strong>Completion Percentage:</strong> {{ progress_entry.completion_percentage }}%</p>
+        <p><strong>Description:</strong> {{ progress_entry.description }}</p>
+        {% if progress_entry.notes %}
+            <p><strong>Notes:</strong> {{ progress_entry.notes }}</p>
+        {% endif %}
+        <p><a href="{% url 'progress_tracking:goal_detail' progress_entry.goal.pk %}">Back to Goal</a></p>
+    </div>
+</body>
+</html>

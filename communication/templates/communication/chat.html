@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Chat with {{ other_participant.username }}{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="card shadow-lg rounded-lg">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+            <i class="material-icons me-2">chat</i>
+            <h2 class="h5 mb-0">Chat with {{ other_participant.get_full_name|default:other_participant.username }}</h2>
+        </div>
+        <div class="card-body p-0">
+            <div class="chat-box p-3" style="height: 400px; overflow-y: scroll; background-color: #f8f9fa;">
+                {% for message in messages %}
+                    <div class="d-flex {% if message.sender == request.user %}justify-content-end{% else %}justify-content-start{% endif %} mb-2">
+                        <div class="message p-2 rounded-3 {% if message.sender == request.user %}bg-primary text-white{% else %}bg-light border{% endif %}" style="max-width: 70%;">
+                            <small class="fw-bold">{{ message.sender.get_full_name|default:message.sender.username }}:</small>
+                            <p class="mb-1">{{ message.body }}</p>
+                            <small class="text-opacity-75 {% if message.sender == request.user %}text-white{% else %}text-muted{% endif %}" style="font-size: 0.75em;">{{ message.timestamp|date:"H:i M d, Y" }}</small>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="alert alert-info text-center" role="alert">
+                        No messages yet. Start the conversation!
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="card-footer bg-light">
+            <form method="post" action="{% url 'communication:chat_view' mentorship.id %}" class="d-flex">
+                {% csrf_token %}
+                <textarea name="body" placeholder="Type your message here..." required class="form-control me-2" rows="1" style="resize: none;"></textarea>
+                <button type="submit" class="btn btn-primary">
+                    <i class="material-icons">send</i>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

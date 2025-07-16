@@ -197,6 +197,7 @@
                     </a>
                     <a href="{% url 'my_profile' %}"><i class="fas fa-user-circle"></i>My Profile</a>
                 {% elif user.mentee %}
+                    <a href="{% url 'mentee_dashboard' %}"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
                     <a href="{% url 'mentor_list' %}"><i class="fas fa-search"></i>Find Mentors</a>
                     <a href="{% url 'progress_tracking:dashboard' %}"><i class="fas fa-chart-line"></i>Progress</a>
                     <a href="{% url 'resources:index' %}"><i class="fas fa-book"></i>Resources</a>

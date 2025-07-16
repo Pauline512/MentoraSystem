@@ -29,8 +29,7 @@ class Goal(models.Model):
         on_delete=models.CASCADE, 
         related_name='mentee_goals',
         limit_choices_to={'groups__name': 'Mentor'},
-        null=True, 
-        blank=True
+        
     )
     title = models.CharField(max_length=200)
     description = models.TextField()

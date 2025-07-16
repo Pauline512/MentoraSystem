@@ -197,6 +197,11 @@ def register_user(request):
                 Mentee.objects.create(user=user)
             elif role == 'mentor':
                 Mentor.objects.create(user=user)
+                # Add user to Mentor group
+                from django.contrib.auth.models import Group
+                mentor_group, created = Group.objects.get_or_create(name='Mentor')
+                user.groups.add(mentor_group)
+                user.save()
             elif role == 'admin':
                 user.is_staff = True
                 user.is_superuser = True
@@ -411,13 +416,12 @@ def mentee_dashboard(request):
     user = request.user
 
     # Confirm the user has a "Student Profile" to access their dashboard.
-    try:
-        mentee_profile = Mentee.objects.get(user=user)
-    except Mentee.DoesNotExist:
+    mentee_profile = getattr(user, 'mentee', None)
+    if mentee_profile is None:
         messages.error(request, "You must have a mentee profile to view your dashboard.")
         return redirect('home') # Redirect if no mentee profile
 
-    # Fetch all requests for the logged-in mentee and ordering them by request date
+    # Fetch all requests for the logged-in mentee and order them by request date
     all_requests = MentorshipRequest.objects.filter(mentee=mentee_profile).order_by('-request_date')
 
     # Calculating statistics

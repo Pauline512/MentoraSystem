@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth import get_user_model # <--- CHANGED THIS LINE
 from django.utils import timezone
 from .models import Goal, ProgressEntry
+from django.contrib.auth.models import Group
 
 # Get the currently active user model (which is your CustomUser)
 User = get_user_model() # <--- ADDED THIS LINE
@@ -37,7 +38,8 @@ class GoalForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # Filter mentors to only show users in the Mentor group
         self.fields['mentor'].queryset = User.objects.filter(groups__name='Mentor')
-        self.fields['mentor'].empty_label = "Select a mentor (optional)"
+        self.fields['mentor'].empty_label = None  # No blank option
+        self.fields['mentor'].required = True     # Make it required
 
         # Set minimum date to today
         self.fields['target_date'].widget.attrs['min'] = timezone.now().date().isoformat()

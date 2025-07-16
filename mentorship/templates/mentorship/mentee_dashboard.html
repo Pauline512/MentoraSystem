@@ -125,6 +125,7 @@
                                 </a>
                             {% endif %}
                             {% if request_item.is_session_scheduled %}
+<<<<<<< Updated upstream
                                 <a href="{% url 'complete_session' session_pk=request_item.sessions.first.pk %}" class="btn btn-success">
                                     <i class="fas fa-check"></i> Complete Session
                                 </a>
@@ -136,6 +137,17 @@
                             <span class="status-message pending">
                                 <i class="fas fa-clock"></i> Awaiting mentor's response...
                             </span>
+=======
+                                <a href="{% url 'complete_session' session_pk=request_item.sessions.first.pk %}" class="btn btn-rate">Complete Session & Report</a>
+                                 <a href="{% url 'complete_session' session_pk=request_item.sessions.first.pk %}" class="btn btn-rate">Complete Session & Report</a>
+                                
+                            {% endif %}
+                            {# anchor tag for URL message linking #}
+                            <a href="{% url 'message_thread' request_pk=request_item.pk recipient_pk=request_item.mentor.user.pk %}" class="btn btn-message">Message</a>
+                            
+                        {% elif request_item.status == 'PENDING' %}
+                               <span style="color: var(--light-text); font-size: 0.9em;">Waiting for mentor's response...</span>
+>>>>>>> Stashed changes
                         {% elif request_item.status == 'REJECTED' %}
                             <span class="status-message rejected">
                                 <i class="fas fa-info-circle"></i> 
@@ -143,6 +155,8 @@
                             </span>
                         {% endif %}
                     </div>
+                    <a href="{% url 'progress_tracking:dashboard' %}" class="btn btn-rate">track progress</a>
+                         
                 </div>
             {% endfor %}
         {% else %}

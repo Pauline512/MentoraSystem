@@ -38,7 +38,8 @@ class GoalListView(LoginRequiredMixin, ListView):
         return context
 
 
-class GoalCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+class GoalCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView ):
+    
     model = Goal
     form_class = GoalForm
     template_name = 'progress_tracking/goal_form.html'
@@ -135,6 +136,7 @@ class ProgressEntryDetailView(LoginRequiredMixin, DetailView):
 
 @login_required
 def dashboard_view(request):
+
     user = request.user
     context = {}
     
@@ -147,6 +149,7 @@ def dashboard_view(request):
             'active_goals': mentee_goals.filter(status='in_progress').count(),
             'completed_goals': mentee_goals.filter(status='completed').count(),
             'overdue_goals': [goal for goal in mentee_goals if goal.is_overdue],
+            'request_pk': pk,
             'recent_progress': ProgressEntry.objects.filter(goal__mentor=user)[:5],
             'goal_stats': mentee_goals.aggregate(
                 avg_progress=Avg('progress_percentage'),

@@ -7,4 +7,5 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('upload/', views.upload_resource, name='upload_resource'),
     path('download/<int:pk>/', views.download_resource, name='download_resource'),
+    path('edit/<int:pk>/', views.edit_resource, name='edit_resource'),
 ]

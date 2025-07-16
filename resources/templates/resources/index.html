@@ -1,94 +1,45 @@
 {% extends "mentorship/base.html" %}
+{% load static %}
 
 {% block title %}Mentora Resource Library{% endblock %}
 
-{% block content %}
-<div class="resource-container">
-    <div class="resource-header">
-        <h1><i class="fas fa-books"></i> Resource Library</h1>
-        
-        {% if user.role == 'MENTOR' or user.role == 'ADMIN' %}
-            <a href="{% url 'resources:upload' %}" class="upload-btn">
-                <i class="fas fa-cloud-upload-alt"></i>
-                Upload New Resource
-            </a>
-        {% endif %}
-    </div>
-
-    <div class="resource-grid">
-        {% if resources %}
-            {% for resource in resources %}
-                <div class="resource-card">
-                    <div class="resource-icon">
-                        {% if resource.file %}
-                            <i class="fas fa-file-alt"></i>
-                        {% elif resource.link %}
-                            <i class="fas fa-link"></i>
-                        {% endif %}
-                    </div>
-                    <div class="resource-content">
-                        <h2>{{ resource.title }}</h2>
-                        <p class="description">{{ resource.description }}</p>
-                        <div class="resource-meta">
-                            <span class="uploader">
-                                <i class="fas fa-user"></i>
-                                {{ resource.uploader.get_full_name|default:resource.uploader.username }}
-                            </span>
-                            <span class="date">
-                                <i class="fas fa-calendar"></i>
-                                {{ resource.created_at|date:"F d, Y" }}
-                            </span>
-                        </div>
-                        <div class="resource-actions">
-                            {% if resource.file %}
-                                <a href="{{ resource.file.url }}" class="action-btn download" download>
-                                    <i class="fas fa-download"></i> Download
-                                </a>
-                            {% elif resource.link %}
-                                <a href="{{ resource.link }}" class="action-btn visit" target="_blank" rel="noopener noreferrer">
-                                    <i class="fas fa-external-link-alt"></i> Visit
-                                </a>
-                            {% endif %}
-                            {% if user == resource.uploader or user.role == 'MENTOR' or user.role == 'ADMIN' %}
-                                <a href="{% url 'resources:edit' resource.pk %}" class="action-btn edit">
-                                    <i class="fas fa-edit"></i> Edit
-                                </a>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
-        {% else %}
-            <div class="no-resources">
-                <i class="fas fa-folder-open"></i>
-                <p>No resources have been uploaded yet.</p>
-            </div>
-        {% endif %}
-    </div>
-</div>
-
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
     :root {
-        --primary-color: #2563eb;
-        --primary-dark: #1e40af;
-        --secondary-color: #64748b;
-        --accent-color: #f59e0b;
-        --background-light: #f8fafc;
-        --text-dark: #1e293b;
-        --text-light: #64748b;
-        --white: #ffffff;
-        --success: #22c55e;
-        --error: #ef4444;
-        --warning: #f59e0b;
-        --info: #3b82f6;
+        /* Consistent color scheme from other pages */
+        --primary-color: #4f46e5;
+        --primary-hover: #4338ca;
+        --primary-light: #eef2ff;
+        --secondary-color: #6366f1; /* Kept for gradients */
+        --success-color: #10b981;
+        --warning-color: #f59e0b;
+        --error-color: #ef4444;
+        --info-color: #06b6d4;
+        --background-primary: #f8fafc;
+        --background-secondary: #ffffff;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --text-muted: #94a3b8;
+        --border-color: #e2e8f0;
         --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
         --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
         --transition: all 0.3s ease;
+        --border-radius: 0.75rem;
+        --border-radius-lg: 1rem;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--background-primary);
     }
 
     .resource-container {
-        max-width: 1200px;
-        margin: 2rem auto;
+        max-width: 1400px;
+        margin: 0 auto;
         padding: 2rem;
     }
 
@@ -97,161 +48,296 @@
         justify-content: space-between;
         align-items: center;
         margin-bottom: 2rem;
+        background: var(--background-secondary);
+        padding: 2rem;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
     }
 
-    .resource-header h1 {
-        color: var(--primary-color);
-        font-size: 2rem;
+    .header-content h1 {
+        color: var(--text-primary);
+        font-size: 2.25rem;
         font-weight: 700;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
+        margin: 0 0 0.25rem 0;
+    }
+
+    .header-content p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin: 0;
     }
 
     .upload-btn {
         background-color: var(--primary-color);
-        color: var(--white);
-        padding: 0.75rem 1.5rem;
-        border-radius: 0.5rem;
+        color: var(--background-secondary);
+        padding: 0.8rem 1.5rem;
+        border-radius: var(--border-radius);
         text-decoration: none;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.75rem;
         transition: var(--transition);
+        font-weight: 600;
+        box-shadow: var(--shadow-sm);
+    }
+    .upload-btn:hover {
+        background-color: var(--primary-hover);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
     }
 
-    .upload-btn:hover {
-        background-color: var(--primary-dark);
-        transform: translateY(-2px);
+    .search-filter-bar {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .search-box {
+        flex: 1;
+        min-width: 300px;
+        position: relative;
+    }
+    .search-input {
+        width: 100%;
+        padding: 0.8rem 1rem 0.8rem 2.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        background: var(--background-secondary);
+        font-size: 1rem;
+        transition: var(--transition);
+    }
+    .search-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+    .search-icon {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+    }
+
+    .filter-buttons { display: flex; gap: 0.5rem; }
+    .filter-btn {
+        padding: 0.7rem 1.2rem;
+        border: 1px solid var(--border-color);
+        background: var(--background-secondary);
+        color: var(--text-secondary);
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        transition: var(--transition);
+        font-weight: 500;
+    }
+    .filter-btn.active, .filter-btn:hover {
+        border-color: var(--primary-color);
+        background: var(--primary-light);
+        color: var(--primary-color);
     }
 
     .resource-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
         gap: 1.5rem;
     }
 
     .resource-card {
-        background-color: var(--white);
-        border-radius: 1rem;
+        background: var(--background-secondary);
+        border-radius: var(--border-radius-lg);
         box-shadow: var(--shadow-sm);
         transition: var(--transition);
-        border: 1px solid #e2e8f0;
+        border: 1px solid var(--border-color);
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
     }
-
     .resource-card:hover {
-        box-shadow: var(--shadow-md);
-        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-4px);
     }
 
     .resource-icon {
-        background-color: var(--primary-color);
-        color: var(--white);
+        background: var(--primary-light);
+        color: var(--primary-color);
         padding: 2rem;
         text-align: center;
     }
-
-    .resource-icon i {
-        font-size: 2rem;
-    }
+    .resource-icon i { font-size: 2.5rem; }
 
     .resource-content {
         padding: 1.5rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
     }
-
     .resource-content h2 {
-        color: var(--text-dark);
+        color: var(--text-primary);
         font-size: 1.25rem;
         font-weight: 600;
-        margin-bottom: 0.75rem;
+        margin: 0 0 0.5rem 0;
     }
-
     .description {
-        color: var(--text-light);
-        margin-bottom: 1rem;
-        line-height: 1.5;
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+        flex-grow: 1;
     }
 
     .resource-meta {
         display: flex;
+        flex-wrap: wrap;
         gap: 1rem;
-        color: var(--text-light);
+        color: var(--text-muted);
         font-size: 0.875rem;
-        margin-bottom: 1rem;
+        margin-bottom: 1.5rem;
     }
+    .resource-meta span { display: flex; align-items: center; gap: 0.5rem; }
 
-    .resource-meta span {
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-    }
-
-    .resource-actions {
-        display: flex;
-        gap: 0.75rem;
-    }
-
+    .resource-actions { display: flex; gap: 0.5rem; }
     .action-btn {
-        padding: 0.5rem 1rem;
-        border-radius: 0.375rem;
+        flex: 1;
+        text-align: center;
+        padding: 0.6rem;
+        border-radius: var(--border-radius);
         text-decoration: none;
-        display: flex;
-        align-items: center;
-        gap: 0.375rem;
-        font-size: 0.875rem;
+        font-weight: 600;
         transition: var(--transition);
+        border: 1px solid var(--border-color);
+        background-color: var(--white);
+        color: var(--text-light);
     }
-
-    .action-btn.download {
-        background-color: var(--success);
-        color: var(--white);
-    }
-
-    .action-btn.visit {
-        background-color: var(--info);
-        color: var(--white);
-    }
-
-    .action-btn.edit {
-        background-color: var(--warning);
-        color: var(--white);
-    }
-
-    .action-btn:hover {
-        opacity: 0.9;
-        transform: translateY(-1px);
-    }
+    .action-btn:hover { color: white; border-color: transparent; }
+    .action-btn.download:hover { background-color: var(--success-color); }
+    .action-btn.visit:hover { background-color: var(--info-color); }
+    .action-btn.edit:hover { background-color: var(--warning-color); }
 
     .no-resources {
         grid-column: 1 / -1;
         text-align: center;
         padding: 4rem 2rem;
-        background-color: var(--white);
-        border-radius: 1rem;
-        border: 2px dashed #e2e8f0;
-        color: var(--text-light);
-    }
-
-    .no-resources i {
-        font-size: 3rem;
-        margin-bottom: 1rem;
-    }
-
-    @media (max-width: 768px) {
-        .resource-container {
-            padding: 1rem;
-        }
-
-        .resource-header {
-            flex-direction: column;
-            gap: 1rem;
-            text-align: center;
-        }
-
-        .resource-grid {
-            grid-template-columns: 1fr;
-        }
+        background: var(--background-secondary);
+        border-radius: var(--border-radius-lg);
+        border: 2px dashed var(--border-color);
     }
 </style>
+{% endblock %}
+
+{% block content %}
+<div class="resource-wrapper">
+    <div class="resource-container">
+        <div class="resource-header">
+            <div class="header-content">
+                <h1><i class="fas fa-book-open"></i> Resource Library</h1>
+                <p>Discover, share, and access valuable learning materials.</p>
+            </div>
+            
+            {% if user.is_authenticated and user.mentor %}
+                <a href="{% url 'resources:upload' %}" class="upload-btn">
+                    <i class="fas fa-cloud-upload-alt"></i> Upload New Resource
+                </a>
+            {% endif %}
+        </div>
+
+        <div class="search-filter-bar">
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="resource-search" class="search-input" placeholder="Search resources...">
+            </div>
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="files">Files</button>
+                <button class="filter-btn" data-filter="links">Links</button>
+            </div>
+        </div>
+
+        <div class="resource-grid">
+            {% for resource in resources %}
+                <div class="resource-card" data-type="{% if resource.file %}files{% else %}links{% endif %}" data-search-text="{{ resource.title }} {{ resource.description }}">
+                    <div class="resource-icon">
+                        {% if resource.file %}
+                            <i class="fas fa-file-alt"></i>
+                        {% else %}
+                            <i class="fas fa-link"></i>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="resource-content">
+                        <h2>{{ resource.title }}</h2>
+                        <p class="description">{{ resource.description|truncatewords:20 }}</p>
+                        
+                        <div class="resource-meta">
+                            <span><i class="fas fa-user"></i> {{ resource.uploader.get_full_name|default:resource.uploader.username }}</span>
+                            <span><i class="fas fa-calendar-alt"></i> {{ resource.created_at|date:"M d, Y" }}</span>
+                            {% if resource.file %}
+                                <span><i class="fas fa-hdd"></i> {{ resource.file.size|filesizeformat }}</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="resource-actions">
+                            {% if resource.file %}
+                                <a href="{{ resource.file.url }}" class="action-btn download" download>Download</a>
+                            {% elif resource.link %}
+                                <a href="{{ resource.link }}" class="action-btn visit" target="_blank" rel="noopener noreferrer">Visit Link</a>
+                            {% endif %}
+                            
+                            {% if user == resource.uploader or user.is_staff %}
+                                <a href="{% url 'resources:edit' resource.pk %}" class="action-btn edit">Edit</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="no-resources">
+                    <h3>No Resources Found</h3>
+                    <p>Be the first to share valuable learning materials!</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('resource-search');
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const resourceCards = document.querySelectorAll('.resource-card');
+
+    function applyFilters() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
+
+        resourceCards.forEach(card => {
+            const cardType = card.dataset.type;
+            const cardText = card.dataset.searchText.toLowerCase();
+
+            const typeMatch = (activeFilter === 'all' || cardType === activeFilter);
+            const searchMatch = cardText.includes(searchTerm);
+
+            if (typeMatch && searchMatch) {
+                card.style.display = 'flex';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    if(searchInput) {
+        searchInput.addEventListener('input', applyFilters);
+    }
+
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            applyFilters();
+        });
+    });
+});
+</script>
 {% endblock %}

@@ -1,235 +1,317 @@
 <!-- my_requests.html -->
-{% load notification_extras %}  {# manually loading the notification_badge #}
+{% extends 'mentorship/base.html' %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Sent Requests</title>
-    <style>
-        body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background-color: #f8f9fa; color: #343a40; line-height: 1.6; }
-        .navbar {
-            background-color: #ffffff; padding: 15px 40px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e9ecef;
-        }
-        .navbar .logo { font-size: 1.5em; font-weight: bold; color: #007bff; text-decoration: none; }
-        .navbar .nav-links a { color: #007bff; text-decoration: none; margin-left: 25px; font-weight: 500; transition: color 0.2s ease-in-out; }
-        .navbar .nav-links a:hover { color: #0056b3; }
+{% block title %}My Requests{% endblock %}
 
-        .container {
-            background-color: white;
-            border: 1px solid #e9ecef;
-            border-radius: 10px;
-            padding: 30px;
-            max-width: 900px;
-            margin: 30px auto;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        }
-        h1 { color: #007bff; text-align: center; margin-bottom: 25px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        .request-item {
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            background-color: #fefefe;
-            position: relative;
-        }
-        .request-item.pending { background-color: #fffde7; border-color: #ffecb3; } /* Light yellow for pending */
-        .request-item.accepted { background-color: #e8f5e9; border-color: #c8e6c9; } /* Light green for accepted */
-        .request-item.rejected { background-color: #ffebee; border-color: #ffcdd2; } /* Light red for rejected */
+{% block content %}
+<div class="requests-container">
+    <header class="requests-header">
+        <h1>
+            <i class="fas fa-paper-plane"></i>
+            My Mentorship Requests
+        </h1>
+    </header>
 
-        .request-item .status-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 0.8em;
-            font-weight: bold;
-            color: white;
-        }
-        .status-badge.PENDING { background-color: #ffc107; } /* Orange */
-        .status-badge.ACCEPTED { background-color: #28a745; } /* Green */
-        .status-badge.REJECTED { background-color: #dc3545; } /* Red */
-
-        .request-item h2 {
-            margin-top: 0;
-            margin-bottom: 10px;
-            color: #333;
-        }
-        .request-item p {
-            font-size: 0.95em;
-            color: #666;
-            margin-bottom: 5px;
-        }
-        .request-item .message {
-            font-style: italic;
-            color: #555;
-            border-left: 3px solid #007bff;
-            padding-left: 10px;
-            margin: 10px 0;
-        }
-        .request-item .timestamps {
-            font-size: 0.8em;
-            color: #888;
-            margin-top: 10px;
-        }
-        .no-requests {
-            text-align: center;
-            color: #6c757d;
-            padding: 20px;
-            border: 1px dashed #ced4da;
-            border-radius: 8px;
-        }
-        .messages {
-            list-style-type: none; padding: 0; margin-bottom: 20px;
-        }
-        .messages li {
-            padding: 10px; border-radius: 4px; margin-bottom: 10px;
-        }
-        .messages .success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
-        .messages .error { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
-        .messages .info { background-color: #d1ecf1; color: #0c5460; border-color: #bee5eb; }
-
-
-         .action-buttons {
-            margin-top: 10px;
-            display: flex;
-            gap: 10px;
-        }
-        .action-buttons .btn {
-            padding: 8px 15px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-size: 0.9em;
-            font-weight: 600;
-            transition: background-color 0.2s ease-in-out;
-        }
-        .action-buttons .btn-accept {
-            background-color: #28a745; /* Green */
-            color: white;
-        }
-        .action-buttons .btn-accept:hover { background-color: #218838; }
-        .action-buttons .btn-decline {
-            background-color: #dc3545; /* Red */
-            color: white;
-        }
-        .action-buttons .btn-decline:hover { background-color: #c82333; }
-        .action-buttons .btn-view {
-            background-color: #007bff; /* Blue */
-            color: white;
-        }
-        .action-buttons .btn-view:hover { background-color: #0056b3; }
-
-        .pending-requests-section {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-        }
-        .pending-requests-section h2 {
-            color: #007bff;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .pending-request-item {
-            border: 1px solid #ffc107; /* Warning yellow border */
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 10px;
-            background-color: #fff3cd; /* Light yellow background */
-        }
-        .pending-request-item .content {
-            margin-bottom: 10px;
-        }
-    </style>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-</head>
-<body>
-       <nav class="navbar">
-        <a href="{% url 'home' %}" class="logo">Guidestar Connect Hub</a>
-        <div class="nav-links">
-            {% if user.is_authenticated %}
-                <a href="{% url 'mentor_list' %}">Find Mentors</a>
-                <a href="{% url 'mentee_dashboard' %}">My Dashboard</a> {# New link to dashboard #}
-                <a href="{% url 'my_requests' %}">My Requests</a>
-                <a href="{% url 'my_notifications' %}">
-                    My Notifications
-                    {% notification_badge %}
-                </a>
-                <a href="#">My Profile</a>
-                <form action="{% url 'logout' %}" method="post" style="display: inline;">
-    {% csrf_token %}
-    <button type="submit" style="background: none; border: none; color: inherit; cursor: pointer; font-size: 1em; padding: 0;">Logout</button>
-</form>
-            {% else %}
-                <a href="{% url 'login' %}">Login</a>
-                <a href="{% url 'register' %}">Register</a>
-            {% endif %}
-        </div>
-    </nav>
-
-
-    <div class="container">
-        {% if messages %}
-            <ul class="messages">
-                {% for message in messages %}
-                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-
-        <h1>My Sent Mentorship Requests</h1>
-
-        {% if requests %}
+    {% if requests %}
+        <div class="requests-grid">
             {% for request_item in requests %}
-                <div class="request-item {{ request_item.status|lower }}"> {# added status class for styling #}
-                    <span class="status-badge {{ request_item.status }}">{{ request_item.get_status_display }}</span> 
-                    {% if is_mentor %}
-                        <h2>Request from: <a href="{% url 'mentor_detail' pk=request_item.mentor.pk %}">{{ request_item.mentee.user.username }}</a></h2>
-                    {% endif %}
+                <div class="request-card {{ request_item.status|lower }}">
+                    <div class="status-badge {{ request_item.status }}">
+                        <i class="fas {% if request_item.status == 'PENDING' %}fa-clock{% elif request_item.status == 'ACCEPTED' %}fa-check-circle{% else %}fa-times-circle{% endif %}"></i>
+                        {{ request_item.get_status_display }}
+                    </div>
 
-                    {% if is_mentee %}
-                        <h2>Request to: <a href="{% url 'mentor_detail' pk=request_item.mentor.pk %}">{{ request_item.mentor.user.username }}</a></h2>
-                    {% endif %}
-                    <p><strong>Your Message:</strong></p>
-                    <p class="message">{{ request_item.message }}</p>
-
-                    <div class="timestamps">
-                        <p>Sent on: {{ request_item.request_date|date:"M d, Y H:i" }}</p>
-                        {% if request_item.response_date %}
-                            <p>Responded on: {{ request_item.response_date|date:"M d, Y H:i" }}</p>
+                    <div class="request-header">
+                        {% if is_mentor %}
+                            <h2>From: <a href="{% url 'mentor_detail' pk=request_item.mentor.pk %}">{{ request_item.mentee.user.username }}</a></h2>
                         {% endif %}
-                        {% if request_item.status == 'REJECTED' and request_item.rejection_reason %}
-                            <p style="color: #dc3545;"><strong>Reason for Rejection:</strong> {{ request_item.rejection_reason }}</p>
+                        {% if is_mentee %}
+                            <h2>To: <a href="{% url 'mentor_detail' pk=request_item.mentor.pk %}">{{ request_item.mentor.user.username }}</a></h2>
                         {% endif %}
                     </div>
-                    {% if is_mentor %}
-                        {% if request_item.status == 'PENDING' %}
 
-                        <div class="action-buttons">
-                                    {# Form for accepting the request #}
-                                    <form method="post" action="{% url 'accept_request' request_pk=request_item.pk %}" style="display:inline;">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-accept">Accept</button>
-                                    </form>
-                                    {# Form for declining the request #}
-                                    <form method="post" action="{% url 'decline_request' request_pk=request_item.pk %}" style="display:inline;">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-decline">Decline</button>
-                                    </form>
-                                    {# Link to view the mentee's profile (future feature) or mentor's own profile #}
-                                    <a href="{% url 'mentor_detail' pk=request_item.mentor.pk %}" class="btn btn-view">View Request</a>
-                           </div>
+                    <div class="request-content">
+                        <div class="message-box">
+                            <strong>Message:</strong>
+                            <p>{{ request_item.message }}</p>
+                        </div>
+
+                        <div class="timestamps">
+                            <span>
+                                <i class="fas fa-calendar-alt"></i>
+                                Sent: {{ request_item.request_date|date:"M d, Y H:i" }}
+                            </span>
+                            {% if request_item.response_date %}
+                                <span>
+                                    <i class="fas fa-reply"></i>
+                                    Responded: {{ request_item.response_date|date:"M d, Y H:i" }}
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        {% if request_item.status == 'REJECTED' and request_item.rejection_reason %}
+                            <div class="rejection-reason">
+                                <i class="fas fa-info-circle"></i>
+                                <span>{{ request_item.rejection_reason }}</span>
+                            </div>
                         {% endif %}
-                    {% endif %}
 
+                        {% if is_mentor and request_item.status == 'PENDING' %}
+                            <div class="action-buttons">
+                                <form method="post" action="{% url 'accept_request' request_pk=request_item.pk %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-accept">
+                                        <i class="fas fa-check"></i> Accept
+                                    </button>
+                                </form>
+                                <form method="post" action="{% url 'decline_request' request_pk=request_item.pk %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-decline">
+                                        <i class="fas fa-times"></i> Decline
+                                    </button>
+                                </form>
+                                <a href="{% url 'mentor_detail' pk=request_item.mentor.pk %}" class="btn btn-view">
+                                    <i class="fas fa-eye"></i> View Details
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
             {% endfor %}
-        {% else %}
-            <p class="no-requests">You have not sent any mentorship requests yet.</p>
-            <p class="no-requests"><a href="{% url 'mentor_list' %}">Find a mentor to get started!</a></p>
-        {% endif %}
-    </div>
-</body>
-</html>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <p>You have not sent any mentorship requests yet.</p>
+            <a href="{% url 'mentor_list' %}" class="btn btn-primary">
+                <i class="fas fa-search"></i> Find a Mentor
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    :root {
+        --primary-color: #2563eb;
+        --primary-dark: #1e40af;
+        --secondary-color: #64748b;
+        --accent-color: #f59e0b;
+        --background-light: #f8fafc;
+        --text-dark: #1e293b;
+        --text-light: #64748b;
+        --white: #ffffff;
+        --success: #22c55e;
+        --error: #ef4444;
+        --warning: #f59e0b;
+        --info: #3b82f6;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        --transition: all 0.3s ease;
+    }
+
+    .requests-container {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 2rem;
+    }
+
+    .requests-header {
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .requests-header h1 {
+        color: var(--primary-color);
+        font-size: 2rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+
+    .requests-grid {
+        display: grid;
+        gap: 1.5rem;
+    }
+
+    .request-card {
+        background: var(--white);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+        position: relative;
+        border: 1px solid #e2e8f0;
+    }
+
+    .request-card:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+    }
+
+    .request-card.pending {
+        border-left: 4px solid var(--warning);
+    }
+
+    .request-card.accepted {
+        border-left: 4px solid var(--success);
+    }
+
+    .request-card.rejected {
+        border-left: 4px solid var(--error);
+    }
+
+    .status-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .status-badge.PENDING {
+        background-color: var(--warning);
+        color: var(--white);
+    }
+
+    .status-badge.ACCEPTED {
+        background-color: var(--success);
+        color: var(--white);
+    }
+
+    .status-badge.REJECTED {
+        background-color: var(--error);
+        color: var(--white);
+    }
+
+    .request-header h2 {
+        color: var(--text-dark);
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+    }
+
+    .request-header a {
+        color: var(--primary-color);
+        text-decoration: none;
+        transition: var(--transition);
+    }
+
+    .request-header a:hover {
+        color: var(--primary-dark);
+    }
+
+    .message-box {
+        background: var(--background-light);
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin: 1rem 0;
+    }
+
+    .timestamps {
+        display: flex;
+        gap: 1rem;
+        color: var(--text-light);
+        font-size: 0.875rem;
+        margin-top: 1rem;
+    }
+
+    .timestamps span {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .rejection-reason {
+        margin-top: 1rem;
+        padding: 1rem;
+        background: #fff5f5;
+        border-radius: 0.5rem;
+        color: var(--error);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+    }
+
+    .btn {
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        border: none;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--transition);
+    }
+
+    .btn-accept {
+        background: var(--success);
+        color: var(--white);
+    }
+
+    .btn-decline {
+        background: var(--error);
+        color: var(--white);
+    }
+
+    .btn-view {
+        background: var(--info);
+        color: var(--white);
+        text-decoration: none;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--white);
+        border-radius: 1rem;
+        border: 2px dashed #e2e8f0;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        color: var(--text-light);
+        margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+        color: var(--text-light);
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-primary {
+        background: var(--primary-color);
+        color: var(--white);
+        text-decoration: none;
+        display: inline-flex;
+    }
+
+    @media (max-width: 768px) {
+        .requests-container {
+            padding: 1rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}

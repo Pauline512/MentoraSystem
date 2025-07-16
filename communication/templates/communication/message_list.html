@@ -1,121 +1,292 @@
 {% extends 'mentorship/base.html' %}
 
-{% block title %}Messages{% endblock %}
+{% block title %}Messages - Mentora{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1>Your Conversations</h1>
+<div class="messages-container">
+    <header class="messages-header">
+        <h1>
+            <i class="fas fa-comments"></i>
+            Your Conversations
+        </h1>
+    </header>
 
     {% if conversations %}
         <div class="conversation-list">
             {% for convo in conversations %}
-                <div class="conversation-item">
+                <div class="conversation-card {% if convo.has_unread %}unread{% endif %}">
                     <div class="conversation-header">
-                        <h2>
-                            Conversation with: {{ convo.other_party.get_full_name|default:convo.other_party.username }}
-                        </h2>
-                        <span class="request-info">
-                            (Request for: {{ convo.request.mentor.user.username }} by {{ convo.request.mentee.user.username }})
-                        </span>
-                    </div>
-                    <div class="conversation-body">
-                        {% if convo.last_message %}
-                            <p class="last-message-snippet">
-                                <strong>{{ convo.last_message.sender.username }}:</strong> {{ convo.last_message.content|truncatechars:100 }}
-                            </p>
-                            <span class="last-message-time">{{ convo.last_message.timestamp|date:"M d, Y H:i" }}</span>
-                        {% else %}
-                            <p class="no-messages">No messages yet in this conversation.</p>
+                        <div class="user-info">
+                            <div class="avatar">
+                                <i class="fas fa-user-circle"></i>
+                            </div>
+                            <div class="details">
+                                <h2>{{ convo.other_party.get_full_name|default:convo.other_party.username }}</h2>
+                                <span class="request-info">
+                                    <i class="fas fa-handshake"></i>
+                                    {{ convo.request.mentor.user.username }} & {{ convo.request.mentee.user.username }}
+                                </span>
+                            </div>
+                        </div>
+                        {% if convo.has_unread %}
+                            <div class="unread-badge">
+                                <i class="fas fa-circle"></i>
+                                New
+                            </div>
                         {% endif %}
                     </div>
+
+                    <div class="conversation-body">
+                        {% if convo.last_message %}
+                            <div class="last-message">
+                                <p class="message-preview">
+                                    <span class="sender">{{ convo.last_message.sender.username }}</span>
+                                    {{ convo.last_message.content|truncatechars:100 }}
+                                </p>
+                                <span class="timestamp">
+                                    <i class="fas fa-clock"></i>
+                                    {{ convo.last_message.timestamp|date:"M d, Y H:i" }}
+                                </span>
+                            </div>
+                        {% else %}
+                            <p class="no-messages">
+                                <i class="fas fa-inbox"></i>
+                                No messages yet in this conversation.
+                            </p>
+                        {% endif %}
+                    </div>
+
                     <div class="conversation-actions">
-                        <a href="{% url 'message_thread' request_pk=convo.request.pk recipient_pk=convo.other_party.pk %}" class="btn btn-primary">View Thread</a>
+                        <a href="{% url 'message_thread' request_pk=convo.request.pk recipient_pk=convo.other_party.pk %}" class="action-btn">
+                            <i class="fas fa-arrow-right"></i>
+                            View Conversation
+                        </a>
                     </div>
                 </div>
             {% endfor %}
         </div>
     {% else %}
-        <p>You have no active conversations.</p>
+        <div class="empty-state">
+            <i class="fas fa-comments"></i>
+            <p>You have no active conversations.</p>
+            <a href="{% url 'mentor_list' %}" class="action-btn">
+                <i class="fas fa-search"></i>
+                Find Mentors
+            </a>
+        </div>
     {% endif %}
 </div>
 
 <style>
-    .container {
+    :root {
+        --primary-color: #2563eb;
+        --primary-dark: #1e40af;
+        --secondary-color: #64748b;
+        --accent-color: #f59e0b;
+        --background-light: #f8fafc;
+        --text-dark: #1e293b;
+        --text-light: #64748b;
+        --white: #ffffff;
+        --success: #22c55e;
+        --error: #ef4444;
+        --warning: #f59e0b;
+        --info: #3b82f6;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        --transition: all 0.3s ease;
+    }
+
+    .messages-container {
         max-width: 900px;
-        margin: 30px auto;
-        padding: 20px;
-        background-color: #fff;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin: 2rem auto;
+        padding: 2rem;
     }
-    h1 {
-        color: #333;
-        margin-bottom: 20px;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 10px;
+
+    .messages-header {
+        margin-bottom: 2rem;
+        text-align: center;
     }
+
+    .messages-header h1 {
+        color: var(--primary-color);
+        font-size: 2rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+
     .conversation-list {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
+        display: grid;
+        gap: 1.5rem;
     }
-    .conversation-item {
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 15px;
-        background-color: #f9f9f9;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
+
+    .conversation-card {
+        background: var(--white);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+        border: 1px solid #e2e8f0;
     }
+
+    .conversation-card:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+    }
+
+    .conversation-card.unread {
+        border-left: 4px solid var(--primary-color);
+    }
+
     .conversation-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        flex-wrap: wrap;
+        margin-bottom: 1rem;
     }
-    .conversation-header h2 {
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .avatar {
+        width: 3rem;
+        height: 3rem;
+        background: var(--primary-color);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--white);
+        font-size: 1.5rem;
+    }
+
+    .details h2 {
+        color: var(--text-dark);
+        font-size: 1.25rem;
         margin: 0;
-        font-size: 1.2em;
-        color: #007bff;
     }
+
     .request-info {
-        font-size: 0.85em;
-        color: #666;
+        color: var(--text-light);
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
+
+    .unread-badge {
+        background: var(--primary-color);
+        color: var(--white);
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
     .conversation-body {
-        font-size: 0.9em;
-        color: #555;
+        padding: 1rem 0;
+        border-top: 1px solid #e2e8f0;
+        border-bottom: 1px solid #e2e8f0;
     }
-    .last-message-snippet {
+
+    .last-message {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .message-preview {
         margin: 0;
-        font-style: italic;
+        color: var(--text-dark);
     }
-    .last-message-time {
-        font-size: 0.8em;
-        color: #888;
-        text-align: right;
-        display: block;
-        margin-top: 5px;
+
+    .message-preview .sender {
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-right: 0.5rem;
     }
+
+    .timestamp {
+        color: var(--text-light);
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
     .no-messages {
-        color: #888;
-        font-style: italic;
+        color: var(--text-light);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        justify-content: center;
+        margin: 0;
     }
+
     .conversation-actions {
-        text-align: right;
+        margin-top: 1rem;
+        display: flex;
+        justify-content: flex-end;
     }
-    .btn-primary {
-        background-color: #007bff;
-        color: white;
-        padding: 8px 15px;
-        border-radius: 5px;
+
+    .action-btn {
+        background: var(--primary-color);
+        color: var(--white);
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
         text-decoration: none;
-        font-size: 0.9em;
-        transition: background-color 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--transition);
+        font-weight: 500;
     }
-    .btn-primary:hover {
-        background-color: #0056b3;
+
+    .action-btn:hover {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--white);
+        border-radius: 1rem;
+        border: 2px dashed #e2e8f0;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        color: var(--text-light);
+        margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+        color: var(--text-light);
+        margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .messages-container {
+            padding: 1rem;
+        }
+
+        .conversation-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .unread-badge {
+            align-self: flex-start;
+        }
     }
 </style>
 {% endblock %}

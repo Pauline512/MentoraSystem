@@ -2,30 +2,115 @@
 
 {% block extra_head %}
 <style>
+    /* Dashboard Layout */
     .dashboard-container {
         max-width: 1200px;
-        margin: 30px auto;
-        padding: 30px;
+        margin: 2rem auto;
+        padding: 2rem;
         background-color: var(--white);
-        border-radius: 10px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-md);
     }
-    h1 {
-        color: var(--primary-dark-green);
-        margin-bottom: 10px;
-        font-size: 2.2em;
+
+    /* Typography */
+    .dashboard-header {
+        margin-bottom: 2rem;
     }
-    .dashboard-container > p { /* Subtitle */
-        color: var(--light-text);
-        margin-bottom: 30px;
-        font-size: 1.1em;
+
+    .dashboard-header h1 {
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+        font-size: 2rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    .dashboard-header p {
+        color: var(--text-light);
+        font-size: 1.1rem;
+        max-width: 600px;
+    }
+
+    /* Dashboard Grid System */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    /* Card Components */
+    .dashboard-card {
+        background: var(--white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+        border: 1px solid #e2e8f0;
+    }
+
+    .dashboard-card:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+    }
+
+    /* Stats Components */
+    .stats-container {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .stat-item {
+        flex: 1;
+        min-width: 200px;
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 0.5rem;
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: var(--text-light);
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .dashboard-container {
+            margin: 1rem;
+            padding: 1.5rem;
+        }
+
+        .dashboard-header h1 {
+            font-size: 1.75rem;
+        }
+
+        .stat-item {
+            min-width: 150px;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-    <div class="dashboard-container">
+<div class="dashboard-container">
+    <header class="dashboard-header">
+        <h1>{% block dashboard_title %}Dashboard{% endblock %}</h1>
+        <p>{% block dashboard_subtitle %}Welcome to your personalized dashboard{% endblock %}</p>
+    </header>
+
+    <div class="dashboard-grid">
         {% block dashboard_content %}
         {% endblock %}
     </div>
+</div>
 {% endblock %}

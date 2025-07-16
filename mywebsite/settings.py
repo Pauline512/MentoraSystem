@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'reports',
     'rest_framework',
     'progress_tracking',
+    
 ]
 
 MIDDLEWARE = [

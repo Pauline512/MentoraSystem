@@ -1,150 +1,266 @@
 {% extends 'mentorship/base.html' %}
 
-{% block title %}My Notifications{% endblock %}
+{% block title %}My Notifications - Mentora{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1>My Notifications</h1>
+<div class="notifications-container">
+    <header class="notifications-header">
+        <h1>
+            <i class="fas fa-bell"></i>
+            My Notifications
+        </h1>
+    </header>
 
-    <div class="notification-category">
-        <h2>Request Notifications</h2>
-        {% if request_notifications %}
-            {% for notification in request_notifications %}
-                <a href="{% url 'communication:index' %}" class="notification-item {% if not notification.is_read %}unread{% endif %}">
-                    <div class="icon">
-                        {% if notification.notification_type == 'NEW_REQUEST' %}
-                            <i class="fas fa-user-plus"></i>
-                        {% elif notification.notification_type == 'REQUEST_ACCEPTED' %}
-                            <i class="fas fa-check-circle"></i>
-                        {% elif notification.notification_type == 'REQUEST_REJECTED' %}
-                            <i class="fas fa-times-circle"></i>
-                        {% else %}
-                            <i class="fas fa-bell"></i>
-                        {% endif %}
-                    </div>
-                    <div class="content">
-                        <p>{{ notification.message }}</p>
-                        {% if notification.related_request %}
-                            {# Link to relevant detail page based on role #}
-                            {% if is_mentor %}
-                                <small><a href="{% url 'mentor_detail' pk=notification.related_request.mentor.pk %}">View related mentor: {{ notification.related_request.mentor.user.username }}</a></small>
-                            {% elif is_mentee %}
-                                {# Mentees can view their sent request's details or the mentor's profile #}
-                                <small><a href="{% url 'mentor_detail' pk=notification.related_request.mentor.pk %}">View mentor: {{ notification.related_request.mentor.user.username }}</a></small>
-                            {% endif %}
-                        {% endif %}
-                    </div>
-                    <div class="timestamp">
-                        {{ notification.created_at|date:"M d, Y H:i" }}
-                    </div>
-                </a>
-            {% endfor %}
-        {% else %}
-            <p class="no-notifications">No request notifications at this time.</p>
-        {% endif %}
-    </div>
+    <div class="notification-categories">
+        <div class="notification-category">
+            <h2><i class="fas fa-paper-plane"></i> Request Notifications</h2>
+            {% if request_notifications %}
+                <div class="notification-list">
+                    {% for notification in request_notifications %}
+                        <a href="{% url 'communication:index' %}" class="notification-item {% if not notification.is_read %}unread{% endif %}">
+                            <div class="notification-icon">
+                                {% if notification.notification_type == 'NEW_REQUEST' %}
+                                    <i class="fas fa-user-plus"></i>
+                                {% elif notification.notification_type == 'REQUEST_ACCEPTED' %}
+                                    <i class="fas fa-check-circle"></i>
+                                {% elif notification.notification_type == 'REQUEST_REJECTED' %}
+                                    <i class="fas fa-times-circle"></i>
+                                {% else %}
+                                    <i class="fas fa-bell"></i>
+                                {% endif %}
+                            </div>
+                            <div class="notification-content">
+                                <p>{{ notification.message }}</p>
+                                {% if notification.related_request %}
+                                    <div class="notification-link">
+                                        {% if is_mentor %}
+                                            <a href="{% url 'mentor_detail' pk=notification.related_request.mentor.pk %}">
+                                                <i class="fas fa-external-link-alt"></i> 
+                                                View related mentor: {{ notification.related_request.mentor.user.username }}
+                                            </a>
+                                        {% elif is_mentee %}
+                                            <a href="{% url 'mentor_detail' pk=notification.related_request.mentor.pk %}">
+                                                <i class="fas fa-external-link-alt"></i> 
+                                                View mentor: {{ notification.related_request.mentor.user.username }}
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="notification-timestamp">
+                                <i class="fas fa-clock"></i>
+                                {{ notification.created_at|date:"M d, Y H:i" }}
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <p>No request notifications at this time.</p>
+                </div>
+            {% endif %}
+        </div>
 
-    <div class="notification-category">
-        <h2>Message Notifications</h2>
-        {% if message_notifications %}
-            {% for notification in message_notifications %}
-                <a href="{% url 'mark_notification_read_and_redirect' notification_pk=notification.pk %}" class="notification-item {% if not notification.is_read %}unread{% endif %}">
-                    <div class="icon">
-                        <i class="fas fa-envelope"></i> {# Icon for messages #}
-                    </div>
-                    <div class="content">
-                        <p>{{ notification.message }}</p>
-                        {% if notification.related_request %}
-                            {# Link to relevant detail page based on role #}
-                            {% if is_mentor %}
-                                <small><a href="{% url 'mentor_detail' pk=notification.related_request.mentor.pk %}">View related mentor: {{ notification.related_request.mentor.user.username }}</a></small>
-                            {% elif is_mentee %}
-                                {# Mentees can view their sent request's details or the mentor's profile #}
-                                <small><a href="{% url 'mentor_detail' pk=notification.related_request.mentor.pk %}">View mentor: {{ notification.related_request.mentor.user.username }}</a></small>
-                            {% endif %}
-                        {% endif %}
-                    </div>
-                    <div class="timestamp">
-                        {{ notification.created_at|date:"M d, Y H:i" }}
-                    </div>
-                </a>
-            {% endfor %}
-        {% else %}
-            <p class="no-notifications">No message notifications at this time.</p>
-        {% endif %}
+        <div class="notification-category">
+            <h2><i class="fas fa-envelope"></i> Message Notifications</h2>
+            {% if message_notifications %}
+                <div class="notification-list">
+                    {% for notification in message_notifications %}
+                        <a href="{% url 'mark_notification_read_and_redirect' notification_pk=notification.pk %}" 
+                           class="notification-item {% if not notification.is_read %}unread{% endif %}">
+                            <div class="notification-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="notification-content">
+                                <p>{{ notification.message }}</p>
+                                {% if notification.related_request %}
+                                    <div class="notification-link">
+                                        {% if is_mentor %}
+                                            <a href="{% url 'mentor_detail' pk=notification.related_request.mentor.pk %}">
+                                                <i class="fas fa-external-link-alt"></i> 
+                                                View related mentor: {{ notification.related_request.mentor.user.username }}
+                                            </a>
+                                        {% elif is_mentee %}
+                                            <a href="{% url 'mentor_detail' pk=notification.related_request.mentor.pk %}">
+                                                <i class="fas fa-external-link-alt"></i> 
+                                                View mentor: {{ notification.related_request.mentor.user.username }}
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="notification-timestamp">
+                                <i class="fas fa-clock"></i>
+                                {{ notification.created_at|date:"M d, Y H:i" }}
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <p>No message notifications at this time.</p>
+                </div>
+            {% endif %}
+        </div>
     </div>
 </div>
 
 <style>
-    .container {
-        background-color: white;
-        border: 1px solid #e9ecef;
-        border-radius: 10px;
-        padding: 30px;
-        max-width: 800px;
-        margin: 30px auto;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    :root {
+        --primary-color: #2563eb;
+        --primary-dark: #1e40af;
+        --secondary-color: #64748b;
+        --accent-color: #f59e0b;
+        --background-light: #f8fafc;
+        --text-dark: #1e293b;
+        --text-light: #64748b;
+        --white: #ffffff;
+        --success: #22c55e;
+        --error: #ef4444;
+        --warning: #f59e0b;
+        --info: #3b82f6;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        --transition: all 0.3s ease;
     }
-    h1 {
-        color: #007bff; text-align: center; margin-bottom: 25px; border-bottom: 2px solid #eee; padding-bottom: 10px; 
+
+    .notifications-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 2rem;
     }
-    .notification-category {
-        margin-bottom: 30px;
+
+    .notifications-header {
+        margin-bottom: 2rem;
+        text-align: center;
     }
-    .notification-category h2 {
-        color: #333;
-        margin-bottom: 15px;
-        border-bottom: 1px solid #f0f0f0;
-        padding-bottom: 5px;
-    }
-    .notification-item {
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 10px;
-        background-color: #fefefe;
+
+    .notifications-header h1 {
+        color: var(--primary-color);
+        font-size: 2rem;
+        font-weight: 700;
         display: flex;
         align-items: center;
-        text-decoration: none; /* Remove underline from link */
-        color: inherit; /* Inherit text color */
+        justify-content: center;
+        gap: 0.75rem;
     }
+
+    .notification-categories {
+        display: grid;
+        gap: 2rem;
+    }
+
+    .notification-category {
+        background: var(--white);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .notification-category h2 {
+        color: var(--text-dark);
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .notification-list {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .notification-item {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 1rem;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        background: var(--background-light);
+        text-decoration: none;
+        color: var(--text-dark);
+        transition: var(--transition);
+    }
+
+    .notification-item:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
+    }
+
     .notification-item.unread {
-        background-color: #e6f7ff; /* Light blue for unread */
-        border-color: #91d5ff;
-        font-weight: bold;
+        background: var(--white);
+        border: 1px solid var(--primary-color);
+        box-shadow: var(--shadow-sm);
     }
-    .notification-item .icon {
-        font-size: 1.5em;
-        margin-right: 15px;
-        color: #007bff;
+
+    .notification-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        background: var(--primary-color);
+        color: var(--white);
+        border-radius: 50%;
     }
-    .notification-item.unread .icon {
-        color: #0056b3;
+
+    .notification-content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
     }
-    .notification-item .content {
-        flex-grow: 1;
+
+    .notification-content p {
+        margin: 0;
+        color: var(--text-dark);
     }
-    .notification-item .timestamp {
-        font-size: 0.85em;
-        color: #888;
-        margin-left: 20px;
-        white-space: nowrap; /* Prevent wrapping */
+
+    .notification-link a {
+        color: var(--primary-color);
+        font-size: 0.875rem;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
     }
-    .no-notifications {
+
+    .notification-timestamp {
+        color: var(--text-light);
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        white-space: nowrap;
+    }
+
+    .empty-state {
         text-align: center;
-        color: #6c757d;
-        padding: 20px;
-        border: 1px dashed #ced4da;
-        border-radius: 8px;
+        padding: 3rem 2rem;
+        color: var(--text-light);
     }
-    .messages {
-        list-style-type: none; padding: 0; margin-bottom: 20px;
+
+    .empty-state i {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
     }
-    .messages li {
-        padding: 10px; border-radius: 4px; margin-bottom: 10px;
+
+    @media (max-width: 768px) {
+        .notifications-container {
+            padding: 1rem;
+        }
+
+        .notification-item {
+            grid-template-columns: 1fr;
+        }
+
+        .notification-timestamp {
+            justify-content: flex-start;
+        }
     }
-    .messages .success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
-    .messages .error { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
-    .messages .info { background-color: #d1ecf1; color: #0c5460; border-color: #bee5eb; }
 </style>
 {% endblock %}

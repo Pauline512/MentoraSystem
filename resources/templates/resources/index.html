@@ -1,122 +1,257 @@
-{% extends 'mentorship/base.html' %}
+{% extends "mentorship/base.html" %}
 
-{% block title %}Resources{% endblock %}
+{% block title %}Mentora Resource Library{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1>Shared Resources</h1>
+<div class="resource-container">
+    <div class="resource-header">
+        <h1><i class="fas fa-books"></i> Resource Library</h1>
+        
+        {% if user.role == 'MENTOR' or user.role == 'ADMIN' %}
+            <a href="{% url 'resources:upload' %}" class="upload-btn">
+                <i class="fas fa-cloud-upload-alt"></i>
+                Upload New Resource
+            </a>
+        {% endif %}
+    </div>
 
-    {% if user.is_authenticated and user.is_staff or user.is_superuser or user.mentor %}
-        <div class="upload-button-container">
-            <form action="{% url 'resources:upload_resource' %}" method="get">
-                <button type="submit" class="btn btn-primary">Upload Resource</button>
-            </form>
-        </div>
-    {% endif %}
-
-    {% if resources %}
-        <div class="resource-list">
+    <div class="resource-grid">
+        {% if resources %}
             {% for resource in resources %}
-                <div class="resource-item">
-                    <h2>{{ resource.title }}</h2>
-                    <p>{{ resource.description }}</p>
-                    {% if resource.file %}
-                        <div class="resource-actions">
-                            <a href="{% url 'resources:download_resource' pk=resource.pk %}" class="btn btn-primary" target="_blank">Download</a>
-                            <p class="download-count">Downloads: {{ resource.download_count }}</p>
+                <div class="resource-card">
+                    <div class="resource-icon">
+                        {% if resource.file %}
+                            <i class="fas fa-file-alt"></i>
+                        {% elif resource.link %}
+                            <i class="fas fa-link"></i>
+                        {% endif %}
+                    </div>
+                    <div class="resource-content">
+                        <h2>{{ resource.title }}</h2>
+                        <p class="description">{{ resource.description }}</p>
+                        <div class="resource-meta">
+                            <span class="uploader">
+                                <i class="fas fa-user"></i>
+                                {{ resource.uploader.get_full_name|default:resource.uploader.username }}
+                            </span>
+                            <span class="date">
+                                <i class="fas fa-calendar"></i>
+                                {{ resource.created_at|date:"F d, Y" }}
+                            </span>
                         </div>
-                    {% endif %}
-                    {% if resource.link %}
                         <div class="resource-actions">
-                            <a href="{{ resource.link }}" class="btn btn-primary" target="_blank">Visit Link</a>
+                            {% if resource.file %}
+                                <a href="{{ resource.file.url }}" class="action-btn download" download>
+                                    <i class="fas fa-download"></i> Download
+                                </a>
+                            {% elif resource.link %}
+                                <a href="{{ resource.link }}" class="action-btn visit" target="_blank" rel="noopener noreferrer">
+                                    <i class="fas fa-external-link-alt"></i> Visit
+                                </a>
+                            {% endif %}
+                            {% if user == resource.uploader or user.role == 'MENTOR' or user.role == 'ADMIN' %}
+                                <a href="{% url 'resources:edit' resource.pk %}" class="action-btn edit">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                            {% endif %}
                         </div>
-                    {% endif %}
-                    <p class="resource-meta">Uploaded by {{ resource.uploader.username }} on {{ resource.created_at|date:"M d, Y" }}</p>
+                    </div>
                 </div>
             {% endfor %}
-        </div>
-    {% else %}
-        <p>No resources available yet.</p>
-    {% endif %}
+        {% else %}
+            <div class="no-resources">
+                <i class="fas fa-folder-open"></i>
+                <p>No resources have been uploaded yet.</p>
+            </div>
+        {% endif %}
+    </div>
 </div>
 
 <style>
-    .container {
-        max-width: 900px;
-        margin: 30px auto;
-        padding: 20px;
-        background-color: #fff;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        position: relative; /* Added for positioning the button */
+    :root {
+        --primary-color: #2563eb;
+        --primary-dark: #1e40af;
+        --secondary-color: #64748b;
+        --accent-color: #f59e0b;
+        --background-light: #f8fafc;
+        --text-dark: #1e293b;
+        --text-light: #64748b;
+        --white: #ffffff;
+        --success: #22c55e;
+        --error: #ef4444;
+        --warning: #f59e0b;
+        --info: #3b82f6;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        --transition: all 0.3s ease;
     }
-    h1 {
-        color: #333;
-        margin-bottom: 20px;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 10px;
+
+    .resource-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 2rem;
     }
-    .upload-button-container {
-        position: absolute;
-        top: 20px; /* Adjust as needed */
-        right: 20px; /* Adjust as needed */
-        z-index: 10; /* Ensure it's above other content */
-    }
-    .resource-list {
+
+    .resource-header {
         display: flex;
-        flex-direction: column;
-        gap: 15px;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
     }
-    .resource-item {
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 15px;
-        background-color: #f9f9f9;
+
+    .resource-header h1 {
+        color: var(--primary-color);
+        font-size: 2rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
     }
-    .resource-item h2 {
-        margin-top: 0;
-        color: #007bff;
-        font-size: 1.3em;
-    }
-    .resource-item p {
-        margin-bottom: 5px;
-        color: #555;
-    }
-    .resource-item a {
-        color: #007bff;
-        text-decoration: none;
-    }
-    .resource-item a:hover {
-        text-decoration: underline;
-    }
-    .resource-meta {
-        font-size: 0.8em;
-        color: #888;
-        margin-top: 10px;
-    }
-    .resource-actions {
-        text-align: right;
-        margin-top: 10px;
-    }
-    .download-count {
-        font-size: 0.85em;
-        color: #666;
-        margin-top: 5px;
-    }
-    /* Button Styling */
-    .btn-primary {
-        background-color: var(--primary-dark-green);
+
+    .upload-btn {
+        background-color: var(--primary-color);
         color: var(--white);
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 1em;
-        transition: background-color 0.3s ease;
-        text-decoration: none; /* Ensure no underline */
-        display: inline-block; /* Allow padding and margin */
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--transition);
     }
-    .btn-primary:hover {
-        background-color: var(--darker-green-hover);
+
+    .upload-btn:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-2px);
     }
+
+    .resource-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .resource-card {
+        background-color: var(--white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+    }
+
+    .resource-card:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+    }
+
+    .resource-icon {
+        background-color: var(--primary-color);
+        color: var(--white);
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .resource-icon i {
+        font-size: 2rem;
+    }
+
+    .resource-content {
+        padding: 1.5rem;
+    }
+
+    .resource-content h2 {
+        color: var(--text-dark);
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+
+    .description {
+        color: var(--text-light);
+        margin-bottom: 1rem;
+        line-height: 1.5;
+    }
+
+    .resource-meta {
+        display: flex;
+        gap: 1rem;
+        color: var(--text-light);
+        font-size: 0.875rem;
+        margin-bottom: 1rem;
+    }
+
+    .resource-meta span {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .resource-actions {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .action-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        font-size: 0.875rem;
+        transition: var(--transition);
+    }
+
+    .action-btn.download {
+        background-color: var(--success);
+        color: var(--white);
+    }
+
+    .action-btn.visit {
+        background-color: var(--info);
+        color: var(--white);
+    }
+
+    .action-btn.edit {
+        background-color: var(--warning);
+        color: var(--white);
+    }
+
+    .action-btn:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+    }
+
+    .no-resources {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 4rem 2rem;
+        background-color: var(--white);
+        border-radius: 1rem;
+        border: 2px dashed #e2e8f0;
+        color: var(--text-light);
+    }
+
+    .no-resources i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .resource-container {
+            padding: 1rem;
+        }
+
+        .resource-header {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+        }
+
+        .resource-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
 {% endblock %}

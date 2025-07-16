@@ -1,8 +1,261 @@
 {% extends 'mentorship/dashboard_base.html' %}
 
-{% block title %}Mentor Dashboard{% endblock %}
+{% block title %}Mentor Dashboard - Mentora{% endblock %}
 
 {% block dashboard_content %}
-    <h1>{{ message }}</h1>
-    <p>This is the placeholder for the mentor dashboard content.</p>
+<div class="dashboard-container">
+    <header class="dashboard-header">
+        <h1>
+            <i class="fas fa-chalkboard-teacher"></i>
+            Welcome, {{ request.user.get_full_name|default:request.user.username }}
+        </h1>
+        <p class="subtitle">Manage your mentorship activities and track your impact</p>
+    </header>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <i class="fas fa-users"></i>
+            <div class="stat-content">
+                <h3>Active Mentees</h3>
+                <p class="stat-number">{{ active_mentees_count }}</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-calendar-check"></i>
+            <div class="stat-content">
+                <h3>Sessions Completed</h3>
+                <p class="stat-number">{{ completed_sessions_count }}</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-star"></i>
+            <div class="stat-content">
+                <h3>Average Rating</h3>
+                <p class="stat-number">{{ average_rating|floatformat:1 }}/5.0</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-clock"></i>
+            <div class="stat-content">
+                <h3>Hours Mentored</h3>
+                <p class="stat-number">{{ total_hours }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <section class="dashboard-section pending-requests">
+            <h2><i class="fas fa-paper-plane"></i> Pending Requests</h2>
+            {% if pending_requests %}
+                <div class="request-list">
+                    {% for request in pending_requests %}
+                        <div class="request-card">
+                            <div class="request-info">
+                                <h3>{{ request.mentee.user.get_full_name }}</h3>
+                                <p>{{ request.message|truncatechars:100 }}</p>
+                                <span class="timestamp">
+                                    <i class="fas fa-clock"></i> 
+                                    {{ request.request_date|date:"M d, Y" }}
+                                </span>
+                            </div>
+                            <div class="request-actions">
+                                <a href="{% url 'request_detail' request.pk %}" class="btn btn-primary">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="empty-state">No pending requests at this time</p>
+            {% endif %}
+        </section>
+
+        <section class="dashboard-section upcoming-sessions">
+            <h2><i class="fas fa-calendar"></i> Upcoming Sessions</h2>
+            {% if upcoming_sessions %}
+                <div class="session-list">
+                    {% for session in upcoming_sessions %}
+                        <div class="session-card">
+                            <div class="session-info">
+                                <h3>Session with {{ session.mentee.user.get_full_name }}</h3>
+                                <p>
+                                    <i class="fas fa-clock"></i> 
+                                    {{ session.start_time|date:"M d, Y H:i" }}
+                                </p>
+                                <p>
+                                    <i class="fas fa-video"></i>
+                                    {{ session.meeting_link|default:"In-person meeting" }}
+                                </p>
+                            </div>
+                            <div class="session-actions">
+                                <a href="{{ session.meeting_link }}" class="btn btn-primary">
+                                    <i class="fas fa-video"></i> Join
+                                </a>
+                                <a href="{% url 'session_detail' session.pk %}" class="btn btn-secondary">
+                                    <i class="fas fa-info-circle"></i> Details
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="empty-state">No upcoming sessions scheduled</p>
+            {% endif %}
+        </section>
+    </div>
+</div>
+
+<style>
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .dashboard-header {
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .dashboard-header h1 {
+        color: var(--text-dark);
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+
+    .subtitle {
+        color: var(--text-light);
+        font-size: 1.1rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: var(--white);
+        padding: 1.5rem;
+        border-radius: 1rem;
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .stat-card i {
+        font-size: 2rem;
+        color: var(--primary-color);
+    }
+
+    .stat-content h3 {
+        color: var(--text-light);
+        font-size: 0.875rem;
+        margin: 0;
+    }
+
+    .stat-number {
+        color: var(--text-dark);
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+
+    .dashboard-section {
+        background: var(--white);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .dashboard-section h2 {
+        color: var(--text-dark);
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .request-card, .session-card {
+        background: var(--background-light);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .request-info h3, .session-info h3 {
+        color: var(--text-dark);
+        font-size: 1rem;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .timestamp {
+        color: var(--text-light);
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .request-actions, .session-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .btn {
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--transition);
+    }
+
+    .btn-primary {
+        background: var(--primary-color);
+        color: var(--white);
+    }
+
+    .btn-secondary {
+        background: var(--background-light);
+        color: var(--text-dark);
+    }
+
+    .empty-state {
+        color: var(--text-light);
+        text-align: center;
+        padding: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 1rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
 {% endblock %}

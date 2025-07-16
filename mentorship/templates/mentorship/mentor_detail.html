@@ -1,87 +1,314 @@
-<!-- mentor_detail.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mentor Profile: {{ mentor.user.username }}</title>
-    <style>
-        /* styling for the profile page */
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; line-height: 1.6; }
-        .container {
-            background-color: white;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 20px;
-            max-width: 800px;
-            margin: 20px auto;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        h1 { color: #0056b3; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0;}
-        h2 { color: #333; }
-        p { color: #555; }
-        strong { color: #000; }
-        .back-link { display: block; margin-top: 20px; color: #007bff; text-decoration: none; }
-        .back-link:hover { text-decoration: underline; }
-        .request-button {
-        display: inline-block;
-        background-color: #007bff; /* Blue button */
-        color: white;
-        padding: 10px 15px;
-        border-radius: 5px;
-        text-decoration: none;
-        margin-top: 15px;
-    }
-    .request-button:hover {
-        background-color: #0056b3;
-    }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Mentor Profile: {{ mentor.user.username }}</h1>
-        <p>
-            <strong>Expertise:</strong>
-                {% for interest in mentor.expertise.all %}
-                    {{ interest.name }}{% if not forloop.last %}, {% endif %} {# Add comma if not the last one #}
-                    {% empty %} {# If there are no expertise tags #}
-                            N/A
-                {% endfor %}
-        </p>
-        <p><strong>About Me:</strong></p>
-        <p>{{ mentor.bio }}</p>
+{% extends 'mentorship/base.html' %}
 
-        <div>
-            {# Show different actions based on user's login and request status #}
+{% block title %}{{ mentor.user.get_full_name|default:mentor.user.username }} - Mentora{% endblock %}
+
+{% block content %}
+<div class="mentor-detail-container">
+    <div class="mentor-profile-card">
+        <div class="profile-header">
+            <div class="profile-main">
+                <div class="mentor-avatar">
+                    {% if mentor.user.first_name and mentor.user.last_name %}
+                        {{ mentor.user.first_name|first }}{{ mentor.user.last_name|first }}
+                    {% else %}
+                        {{ mentor.user.username|first }}
+                    {% endif %}
+                </div>
+                <div class="profile-info">
+                    <h1>{{ mentor.user.get_full_name|default:mentor.user.username }}</h1>
+                    <p class="title">{% if mentor.title %}{{ mentor.title }}{% if mentor.company %} at {{ mentor.company }}{% endif %}{% endif %}</p>
+                </div>
+            </div>
             {% if user.is_authenticated %}
                 {% if mentee_has_pending_request %}
-                    <span class="info-message">You have a PENDING request with this mentor.</span>
-                    <a href="{% url 'my_requests' %}" class="request-button" style="background-color: #ffc107;">View My Requests</a>
-                {% else %}
-                    <a href="{% url 'request_mentorship' mentor_pk=mentor.pk %}" class="request-button">Request Mentorship</a>
-                {% endif %}
-
-                {% if messages %}
-                    <div class="container">
-                        {# This is where any "sticky notes" for the student will appear on this page. #}
-                        <ul class="messages">
-                        {% for message in messages %}
-                            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-                        {% endfor %}
-                        </ul>
+                    <div class="action-area">
+                        <span class="status-badge pending">
+                            <i class="fas fa-clock"></i> Pending Request
+                        </span>
+                        <a href="{% url 'my_requests' %}" class="btn btn-secondary">
+                            <i class="fas fa-list"></i> View My Requests
+                        </a>
                     </div>
+                {% else %}
+                    <a href="{% url 'request_mentorship' mentor_pk=mentor.pk %}" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Request Mentorship
+                    </a>
                 {% endif %}
-            
             {% else %}
-                <p class="info-message">Please <a href="{% url 'login' %}">log in</a> to request mentorship.</p>
+                <a href="{% url 'login' %}" class="btn btn-primary">
+                    <i class="fas fa-sign-in-alt"></i> Log in to Request Mentorship
+                </a>
             {% endif %}
-
-            <a href="{% url 'mentor_list' %}" class="back-link">&larr; Back to Mentor List</a>
         </div>
-   
 
-        {# link back to the mentor list #}
-        <a href="{% url 'mentor_list' %}" class="back-link">&larr; Back to Mentor List</a>
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message {{ message.tags }}">
+                        <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="profile-content">
+            <div class="profile-section">
+                <h2><i class="fas fa-lightbulb"></i> Expertise</h2>
+                <div class="expertise-tags">
+                    {% for interest in mentor.expertise.all %}
+                        <span class="tag">{{ interest.name }}</span>
+                    {% empty %}
+                        <p class="empty-text">No expertise listed</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="profile-section">
+                <h2><i class="fas fa-user"></i> About Me</h2>
+                <div class="bio">
+                    {{ mentor.bio|linebreaks }}
+                </div>
+            </div>
+
+            {% if mentor.availability or mentor.experience_years %}
+                <div class="profile-section">
+                    <h2><i class="fas fa-info-circle"></i> Additional Information</h2>
+                    {% if mentor.availability %}
+                        <div class="info-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Available: {{ mentor.availability }}</span>
+                        </div>
+                    {% endif %}
+                    {% if mentor.experience_years %}
+                        <div class="info-item">
+                            <i class="fas fa-briefcase"></i>
+                            <span>{{ mentor.experience_years }}+ years of experience</span>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="profile-footer">
+            <a href="{% url 'mentor_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Mentor List
+            </a>
+        </div>
     </div>
-</body>
-</html>
+</div>
+
+<style>
+    :root {
+        --primary-color: #2563eb;
+        --primary-dark: #1e40af;
+        --secondary-color: #64748b;
+        --accent-color: #f59e0b;
+        --background-light: #f8fafc;
+        --text-dark: #1e293b;
+        --text-light: #64748b;
+        --white: #ffffff;
+        --success: #22c55e;
+        --error: #ef4444;
+        --warning: #f59e0b;
+        --info: #3b82f6;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        --transition: all 0.3s ease;
+    }
+
+    .mentor-detail-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+    }
+
+    .mentor-profile-card {
+        background: var(--white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+    }
+
+    .profile-header {
+        padding: 2rem;
+        background: var(--background-light);
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .profile-main {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .mentor-avatar {
+        width: 5rem;
+        height: 5rem;
+        background: var(--primary-color);
+        color: var(--white);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: 600;
+    }
+
+    .profile-info h1 {
+        color: var(--text-dark);
+        font-size: 1.5rem;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .profile-info .title {
+        color: var(--text-light);
+        margin: 0;
+    }
+
+    .profile-content {
+        padding: 2rem;
+    }
+
+    .profile-section {
+        margin-bottom: 2rem;
+    }
+
+    .profile-section h2 {
+        color: var(--text-dark);
+        font-size: 1.25rem;
+        margin: 0 0 1rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .expertise-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .tag {
+        background: var(--background-light);
+        color: var(--primary-color);
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .bio {
+        color: var(--text-dark);
+        line-height: 1.6;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: var(--text-light);
+        margin-bottom: 0.5rem;
+    }
+
+    .profile-footer {
+        padding: 1.5rem 2rem;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        transition: var(--transition);
+    }
+
+    .btn-primary {
+        background: var(--primary-color);
+        color: var(--white);
+    }
+
+    .btn-secondary {
+        background: var(--background-light);
+        color: var(--text-dark);
+    }
+
+    .btn:hover {
+        transform: translateY(-1px);
+    }
+
+    .status-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .status-badge.pending {
+        background: var(--warning);
+        color: var(--white);
+    }
+
+    .messages {
+        padding: 1.5rem 2rem;
+    }
+
+    .message {
+        padding: 1rem;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .message.success {
+        background: #f0fdf4;
+        color: var(--success);
+    }
+
+    .message.error {
+        background: #fef2f2;
+        color: var(--error);
+    }
+
+    .message.info {
+        background: #eff6ff;
+        color: var(--info);
+    }
+
+    @media (max-width: 768px) {
+        .mentor-detail-container {
+            padding: 1rem;
+        }
+
+        .profile-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1.5rem;
+        }
+
+        .action-area {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}

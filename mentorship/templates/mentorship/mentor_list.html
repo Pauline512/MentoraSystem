@@ -1,384 +1,357 @@
 {% extends 'mentorship/base.html' %}
 
+{% block title %}Find Your Mentor - Mentora{% endblock %}
+
 {% block extra_head %}
-    <title>Find Your Mentor - Guidestar Connect Hub</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        /* General Body and Layout */
-        body {
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f8f9fa;
-            color: #343a40;
-            line-height: 1.6;
-        }
-        /* Navbar Styling */
-        .navbar {
-            background-color: #ffffff;
-            padding: 15px 40px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #e9ecef;
-        }
-        .navbar .logo {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #4CAF50; /* Primary Green */
-            text-decoration: none;
-        }
-        .navbar .nav-links a {
-            color: #4CAF50; /* Primary Green */
-            text-decoration: none;
-            margin-left: 25px;
-            font-weight: 500;
-            transition: color 0.2s ease-in-out;
-            position: relative;
-        }
-        .navbar .nav-links a:hover {
-            color: #45a049; /* Darker Green for hover */
-        }
+<style>
+    :root {
+        --primary-color: #2563eb;
+        --primary-dark: #1e40af;
+        --secondary-color: #64748b;
+        --accent-color: #f59e0b;
+        --background-light: #f8fafc;
+        --text-dark: #1e293b;
+        --text-light: #64748b;
+        --white: #ffffff;
+        --success: #22c55e;
+        --error: #ef4444;
+        --warning: #f59e0b;
+        --info: #3b82f6;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        --transition: all 0.3s ease;
+    }
 
-        /* Main Content Area (Sidebar + Mentor List) */
+    /* General Body and Layout */
+    body {
+        font-family: 'Inter', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f8f9fa;
+        color: #343a40;
+        line-height: 1.6;
+    }
+    /* Navbar Styling */
+    .navbar {
+        background-color: #ffffff;
+        padding: 15px 40px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .navbar .logo {
+        font-size: 1.5em;
+        font-weight: bold;
+        color: #4CAF50; /* Primary Green */
+        text-decoration: none;
+    }
+    .navbar .nav-links a {
+        color: #4CAF50; /* Primary Green */
+        text-decoration: none;
+        margin-left: 25px;
+        font-weight: 500;
+        transition: color 0.2s ease-in-out;
+        position: relative;
+    }
+    .navbar .nav-links a:hover {
+        color: #45a049; /* Darker Green for hover */
+    }
+
+    /* Main Content Area (Sidebar + Mentor List) */
+    .main-content {
+        display: flex;
+        max-width: 1200px;
+        margin: 2rem auto;
+        gap: 2rem;
+    }
+
+    /* Sidebar Styling */
+    .sidebar {
+        flex: 0 0 300px;
+        background: var(--white);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        height: fit-content;
+        position: sticky;
+        top: 2rem;
+    }
+
+    .sidebar h2 {
+        color: var(--text-dark);
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .search-bar {
+        margin-bottom: 1.5rem;
+    }
+
+    .search-bar input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        transition: var(--transition);
+    }
+
+    .search-bar input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .filter-section {
+        margin-bottom: 1.5rem;
+    }
+
+    .filter-section h3 {
+        color: var(--text-dark);
+        font-size: 1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .filter-section ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .filter-section ul li {
+        margin-bottom: 0.5rem;
+    }
+
+    .filter-section ul li a {
+        color: var(--text-dark);
+        text-decoration: none;
+        font-size: 0.875rem;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .filter-section ul li a:hover {
+        color: var(--primary-color);
+    }
+
+    .price-inputs,
+    .availability-inputs {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .price-inputs input,
+    .availability-inputs input {
+        padding: 0.5rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+    }
+
+    button[type="submit"] {
+        width: 100%;
+        padding: 0.75rem;
+        background: var(--primary-color);
+        color: var(--white);
+        border: none;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    button[type="submit"]:hover {
+        background: var(--primary-dark);
+    }
+
+    .clear-filters {
+        color: var(--error);
+        text-decoration: none;
+        font-size: 0.875rem;
+        display: block;
+        text-align: center;
+        margin-top: 0.75rem;
+    }
+
+    /* Mentor Cards */
+    .mentor-list-container {
+        flex: 1;
+    }
+
+    .mentor-card {
+        background: var(--white);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+        border: 1px solid #e2e8f0;
+    }
+
+    .mentor-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .mentor-header {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .mentor-avatar {
+        width: 4rem;
+        height: 4rem;
+        background: var(--primary-color);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--white);
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+
+    .mentor-info h2 {
+        color: var(--text-dark);
+        font-size: 1.25rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .mentor-info p {
+        color: var(--text-light);
+        font-size: 0.875rem;
+    }
+
+    .mentor-meta {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .mentor-meta span {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-light);
+        font-size: 0.875rem;
+    }
+
+    .mentor-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin: 1rem 0;
+    }
+
+    .mentor-tags span {
+        background: var(--background-light);
+        color: var(--primary-color);
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .mentor-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .price {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-dark);
+    }
+
+    .price span {
+        font-size: 0.875rem;
+        color: var(--text-light);
+        font-weight: 400;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: var(--transition);
+    }
+
+    .btn-primary {
+        background: var(--primary-color);
+        color: var(--white);
+    }
+
+    .btn-primary:hover {
+        background: var(--primary-dark);
+    }
+
+    .btn-secondary {
+        background: var(--background-light);
+        color: var(--text-dark);
+    }
+
+    .btn-secondary:hover {
+        background: #e2e8f0;
+    }
+
+    /* Messages Styling */
+    .messages {
+        list-style-type: none; padding: 0; margin-bottom: 20px;
+    }
+    .messages li {
+        padding: 10px; border-radius: 4px; margin-bottom: 10px;
+    }
+    .messages .success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; } /* Already good green */
+    .messages .error { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+    .messages .info { background-color: #EBF5ED; color: #4CAF50; border-color: #c3e6cb; } /* Light green for info */
+
+
+    /* Responsive adjustments */
+    @media (max-width: 1024px) {
         .main-content {
-            display: flex;
-            max-width: 1200px;
-            margin: 30px auto;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            overflow: hidden;
-        }
-
-        /* Sidebar for Filters */
-        .sidebar {
-            flex: 0 0 280px;
-            padding: 30px;
-            background-color: #f8f9fa;
-            border-right: 1px solid #e9ecef;
-            overflow-y: auto;
-        }
-
-        .sidebar h2 {
-            font-size: 1.3em;
-            color: #000000; /* Black for Search & Filters heading */
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-        }
-        .sidebar h2 i {
-            margin-right: 10px;
-            color: #4CAF50; /* Icon in heading remains green */
-        }
-
-        .search-bar {
-            margin-bottom: 30px;
-        }
-        .search-bar input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ced4da;
-            border-radius: 5px;
-            font-size: 1em;
-            box-sizing: border-box;
-        }
-        .search-bar input::placeholder {
-            color: #6c757d;
-        }
-
-        .filter-section {
-            margin-bottom: 25px;
-        }
-        .filter-section h3 {
-            font-size: 1.1em;
-            color: #000000; /* Black for filter subheadings */
-            margin-bottom: 15px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 8px;
-        }
-        .filter-section ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .filter-section ul li {
-            margin-bottom: 8px;
-        }
-        .filter-section ul li a {
-            text-decoration: none;
-            color: #4CAF50; /* Primary Green */
-            font-weight: 500;
-            transition: color 0.2s ease-in-out;
-            display: block;
-            padding: 2px 0;
-        }
-        .filter-section ul li a:hover {
-            color: #45a049; /* Darker Green for hover */
-            text-decoration: underline;
-        }
-        .filter-section .price-inputs,
-        .filter-section .availability-inputs {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        .filter-section .price-inputs input,
-        .filter-section .availability-inputs input {
-            flex: 1;
-            padding: 8px;
-            border: 1px solid #ced4da;
-            border-radius: 5px;
-            font-size: 0.9em;
-        }
-        .filter-section .price-inputs span,
-        .filter-section .availability-inputs span {
-            color: #6c757d;
-        }
-        .filter-section button[type="submit"] {
-            background-color: #4CAF50; /* Primary Green */
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            font-size: 1em;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 20px;
-            transition: background-color 0.2s ease-in-out;
-        }
-        .filter-section button[type="submit"]:hover {
-            background-color: #45a049; /* Darker Green for hover */
-        }
-        .filter-section .clear-filters {
-            display: block;
-            text-align: center;
-            margin-top: 10px;
-            font-size: 0.9em;
-            color: #dc3545; /* Keep red for "Clear" for contrast */
-            text-decoration: none;
-        }
-        .filter-section .clear-filters:hover {
-            text-decoration: underline;
-        }
-
-
-        /* Mentor List Container */
-        .mentor-list-container {
-            flex-grow: 1;
-            padding: 30px;
-        }
-        .mentor-list-container h1 {
-            font-size: 1.8em;
-            color: #343a40;
-            margin-bottom: 25px;
-        }
-
-        /* Individual Mentor Card */
-        .mentor-card {
-            display: flex;
-            background-color: #ffffff;
-            border: 1px solid #e9ecef;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .mentor-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background-color: #4CAF50; /* Primary Green */
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 2em;
-            font-weight: bold;
-            margin-right: 20px;
-            flex-shrink: 0;
-            text-transform: uppercase;
-        }
-        .mentor-info {
-            flex-grow: 1;
-            padding-right: 20px;
-        }
-        .mentor-info h2 {
-            margin: 0 0 5px 0;
-            font-size: 1.4em;
-            color: #343a40;
-        }
-        .mentor-info p {
-            margin: 0 0 5px 0;
-            font-size: 0.95em;
-            color: #6c757d;
-        }
-        .mentor-info .rating {
-            font-size: 0.9em;
-            color: #FBC02D; /* Yellow for stars */
-            margin-top: 5px;
-        }
-        .mentor-info .rating i {
-            margin-right: 3px;
-        }
-        .mentor-info .rating span {
-            color: #6c757d;
-            font-weight: 500;
-        }
-        .mentor-info .location i { /* Specific icon color for location within rating */
-            color: #FBC02D; /* Yellow for map marker icon */
-        }
-        .mentor-description {
-            font-size: 0.9em;
-            color: #555;
-            margin-top: 15px;
-            line-height: 1.5;
-            flex-basis: 100%;
-        }
-        .mentor-tags {
-            margin-top: 15px;
-            flex-basis: 100%;
-        }
-        .mentor-tags span {
-            display: inline-block;
-            background-color: #EBF5ED; /* Light Green for tags */
-            color: #4CAF50; /* Primary Green for tag text */
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8em;
-            margin-right: 8px;
-            margin-bottom: 8px;
-        }
-
-        .mentor-details-meta {
-            display: flex;
-            align-items: center;
-            margin-top: 15px;
-            gap: 20px;
-            flex-basis: 100%;
-            flex-wrap: wrap;
-        }
-        .mentor-details-meta div {
-            display: flex;
-            align-items: center;
-            color: #6c757d;
-            font-size: 0.9em;
-        }
-        .mentor-details-meta div i {
-            margin-right: 8px;
-            color: #FBC02D; /* Yellow for meta icons */
-        }
-
-        .mentor-actions {
-            flex-shrink: 0;
-            display: flex;
             flex-direction: column;
-            align-items: flex-end;
-            gap: 10px;
-            margin-left: auto;
-            padding-left: 20px;
+            padding: 1rem;
         }
-        .mentor-actions .price {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #343a40;
-            margin-bottom: 10px;
-        }
-        .mentor-actions .price span {
-            font-size: 0.8em;
-            font-weight: normal;
-            color: #6c757d;
-        }
-        .mentor-actions .btn {
-            display: block;
+
+        .sidebar {
+            position: static;
             width: 100%;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            font-size: 0.95em;
-            cursor: pointer;
-            text-align: center;
-            text-decoration: none;
-            transition: background-color 0.2s ease-in-out;
         }
-        .mentor-actions .btn-primary {
-            background-color: #4CAF50; /* Primary Green */
-            color: white;
-        }
-        .mentor-actions .btn-primary:hover {
-            background-color: #45a049; /* Darker Green for hover */
-        }
-        .mentor-actions .btn-secondary {
-            background-color: #e9ecef;
-            color: #343a40;
-            border: 1px solid #ced4da;
-        }
-        .mentor-actions .btn-secondary:hover {
-            background-color: #dee2e6;
-        }
-
-        /* Messages Styling */
-        .messages {
-            list-style-type: none; padding: 0; margin-bottom: 20px;
-        }
-        .messages li {
-            padding: 10px; border-radius: 4px; margin-bottom: 10px;
-        }
-        .messages .success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; } /* Already good green */
-        .messages .error { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
-        .messages .info { background-color: #EBF5ED; color: #4CAF50; border-color: #c3e6cb; } /* Light green for info */
-
-
-        /* Responsive adjustments */
-        @media (max-width: 992px) {
-            .main-content {
-                flex-direction: column;
-            }
-            .sidebar {
-                border-right: none;
-                border-bottom: 1px solid #e9ecef;
-                width: 100%;
-                flex: none;
-                order: 1;
-            }
-            .mentor-list-container {
-                order: 2;
-            }
-            .mentor-card {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .mentor-avatar {
-                margin-right: 0;
-                margin-bottom: 15px;
-            }
-            .mentor-info, .mentor-description, .mentor-tags, .mentor-details-meta {
-                padding-right: 0;
-                width: 100%;
-            }
-            .mentor-actions {
-                margin-left: 0;
-                margin-top: 20px;
-                width: 100%;
-                align-items: stretch;
-            }
-        }
-        @media (max-width: 576px) {
-            .navbar { padding: 10px 15px; }
-            .navbar .nav-links { display: none; }
-            .main-content { margin: 15px auto; }
-            .sidebar, .mentor-list-container { padding: 15px; }
-            .mentor-card { padding: 15px; }
-            .mentor-avatar { width: 60px; height: 60px; font-size: 1.5em; margin-bottom: 10px; }
-            .mentor-info h2 { font-size: 1.2em; }
-            .mentor-info p { font-size: 0.85em; }
-            .mentor-actions .price { font-size: 1.2em; }
-        }
-    </style>
+    }
+    @media (max-width: 576px) {
+        .navbar { padding: 10px 15px; }
+        .navbar .nav-links { display: none; }
+        .main-content { margin: 15px auto; }
+        .sidebar, .mentor-list-container { padding: 15px; }
+        .mentor-card { padding: 15px; }
+        .mentor-avatar { width: 60px; height: 60px; font-size: 1.5em; margin-bottom: 10px; }
+        .mentor-info h2 { font-size: 1.2em; }
+        .mentor-info p { font-size: 0.85em; }
+        .mentor-actions .price { font-size: 1.2em; }
+    }
+</style>
 {% endblock %}
 
 {% block content %}

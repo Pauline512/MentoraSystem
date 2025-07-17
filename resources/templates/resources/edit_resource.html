@@ -1,0 +1,121 @@
+{% extends "mentorship/base.html" %}
+
+
+{% block title %}Edit Resource - {{ resource.title }}{% endblock %}
+
+{% block content %}
+<div class="edit-resource-container">
+    <div class="form-card">
+        <h1 class="form-title">Edit Resource</h1>
+        <p class="form-subtitle">Make changes to '{{ resource.title }}' and save.</p>
+        
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            
+            <div class="form-fields">
+    {% for field in form %}
+        <div class="field-wrapper mb-3">
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.help_text %}
+                <small class="form-text text-muted">{{ field.help_text }}</small>
+            {% endif %}
+            {% for error in field.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
+            
+            <div class="form-actions">
+                <a href="{% url 'resources:index' %}" class="btn-cancel">Cancel</a>
+                <button type="submit" class="btn-save">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .edit-resource-container {
+        max-width: 800px;
+        margin: 3rem auto;
+        padding: 2rem;
+    }
+
+    .form-card {
+        background-color: #ffffff;
+        padding: 2.5rem;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        border: 1px solid #e2e8f0;
+    }
+
+    .form-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-subtitle {
+        color: #64748b;
+        margin-bottom: 2rem;
+    }
+
+    .form-fields {
+        margin-bottom: 2rem;
+    }
+
+    /* Basic styling for form fields if not using crispy-forms */
+    .form-fields input, .form-fields textarea, .form-fields select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 1rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .btn-save {
+        background-color: #2563eb;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: background-color 0.3s ease;
+    }
+    .btn-save:hover {
+        background-color: #1e40af;
+    }
+
+    .btn-cancel {
+        background-color: #e5e7eb;
+        color: #374151;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        font-weight: 600;
+        transition: background-color 0.3s ease;
+    }
+    .btn-cancel:hover {
+        background-color: #d1d5db;
+    }
+</style>
+{% endblock %}

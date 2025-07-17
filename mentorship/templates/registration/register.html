@@ -3,106 +3,319 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
+    <title>Create Account</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            margin: 0;
+            padding: 20px;
         }
+
         .register-container {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 400px;
-            box-sizing: border-box;
+            max-width: 450px;
+            position: relative;
+            overflow: hidden;
         }
+
+        .register-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
         h2 {
             text-align: center;
-            color: #333;
-            margin-bottom: 20px;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 28px;
+            font-weight: 600;
         }
+
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 25px;
+            position: relative;
         }
+
         label {
             display: block;
-            margin-bottom: 5px;
-            color: #555;
-            font-weight: bold;
+            margin-bottom: 8px;
+            color: #34495e;
+            font-weight: 500;
+            font-size: 14px;
         }
+
         input[type="text"],
         input[type="email"],
         input[type="password"] {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
+            padding: 15px 20px;
+            border: 2px solid #e1e8ed;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
         }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #667eea;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
         .radio-group label {
-            display: inline-block;
-            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 0;
+            cursor: pointer;
+            padding: 12px 20px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
             font-weight: normal;
+            flex: 1;
+            min-width: 120px;
+            justify-content: center;
         }
+
+        .radio-group label:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
         .radio-group input[type="radio"] {
-            margin-right: 5px;
+            margin-right: 8px;
+            transform: scale(1.2);
         }
+
+        .radio-group input[type="radio"]:checked + span {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .radio-group label:has(input[type="radio"]:checked) {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
         button {
             width: 100%;
-            padding: 10px;
-            background-color: #007bff;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 12px;
             font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
+
         button:hover {
-            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
         }
+
+        button:active {
+            transform: translateY(0);
+        }
+
         .errorlist {
-            color: red;
+            color: #e74c3c;
             list-style-type: none;
             padding: 0;
-            margin-top: 5px;
-            margin-bottom: 10px;
+            margin-top: 8px;
+            margin-bottom: 0;
         }
+
         .errorlist li {
             margin-bottom: 5px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
         }
+
+        .errorlist li::before {
+            content: '⚠️';
+            margin-right: 8px;
+        }
+
         .messages {
             list-style-type: none;
             padding: 0;
-            margin-bottom: 15px;
+            margin-bottom: 25px;
         }
+
         .messages li {
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 10px;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            position: relative;
+            animation: slideIn 0.5s ease;
         }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .messages .success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+            background: linear-gradient(135deg, #00b894, #00a085);
+            color: white;
+            border: none;
         }
+
+        .messages .success::before {
+            content: '✅';
+            margin-right: 10px;
+        }
+
         .messages .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            background: linear-gradient(135deg, #e17055, #d63031);
+            color: white;
+            border: none;
+        }
+
+        .messages .error::before {
+            content: '❌';
+            margin-right: 10px;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid #e1e8ed;
+        }
+
+        .login-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .login-link a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .password-strength {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
+        .strength-bar {
+            height: 4px;
+            background: #e1e8ed;
+            border-radius: 2px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+
+        .strength-fill {
+            height: 100%;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .strength-weak { width: 25%; background: #e74c3c; }
+        .strength-medium { width: 50%; background: #f39c12; }
+        .strength-good { width: 75%; background: #f1c40f; }
+        .strength-strong { width: 100%; background: #27ae60; }
+
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            .register-container {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+            
+            .radio-group {
+                flex-direction: column;
+            }
+            
+            .radio-group label {
+                min-width: auto;
+            }
+        }
+
+        /* Loading state */
+        button.loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        button.loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
     <div class="register-container">
-        <h2>Register</h2>
+        <h2>Create Account</h2>
+        <p class="subtitle">Join us today and get started</p>
+        
         {% if messages %}
             <ul class="messages">
                 {% for message in messages %}
@@ -110,7 +323,8 @@
                 {% endfor %}
             </ul>
         {% endif %}
-        <form method="post">
+        
+        <form method="post" id="registerForm">
             {% csrf_token %}
             {% for field in form %}
                 <div class="form-group">
@@ -118,11 +332,22 @@
                     {% if field.name == 'role' %}
                         <div class="radio-group">
                             {% for radio in field %}
-                                {{ radio }}
+                                <label>
+                                    {{ radio.tag }}
+                                    <span>{{ radio.choice_label }}</span>
+                                </label>
                             {% endfor %}
                         </div>
                     {% else %}
                         {{ field }}
+                        {% if field.name == 'password1' or field.name == 'password' %}
+                            <div class="password-strength">
+                                <div class="strength-text">Password strength: <span id="strength-text">Enter password</span></div>
+                                <div class="strength-bar">
+                                    <div class="strength-fill" id="strength-fill"></div>
+                                </div>
+                            </div>
+                        {% endif %}
                     {% endif %}
                     {% if field.errors %}
                         <ul class="errorlist">
@@ -133,9 +358,103 @@
                     {% endif %}
                 </div>
             {% endfor %}
-            <button type="submit">Register</button>
+            <button type="submit" id="submitBtn">Create Account</button>
         </form>
-        <p style="text-align: center; margin-top: 20px;">Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+        
+        <div class="login-link">
+            Already have an account? <a href="{% url 'login' %}">Sign in here</a>
+        </div>
     </div>
+
+    <script>
+        // Password strength checker
+        function checkPasswordStrength(password) {
+            let strength = 0;
+            let feedback = [];
+
+            if (password.length >= 8) strength += 1;
+            else feedback.push("at least 8 characters");
+
+            if (/[a-z]/.test(password)) strength += 1;
+            else feedback.push("lowercase letter");
+
+            if (/[A-Z]/.test(password)) strength += 1;
+            else feedback.push("uppercase letter");
+
+            if (/[0-9]/.test(password)) strength += 1;
+            else feedback.push("number");
+
+            if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+            else feedback.push("special character");
+
+            return { strength, feedback };
+        }
+
+        // Add password strength indicator
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordFields = document.querySelectorAll('input[type="password"]');
+            
+            passwordFields.forEach(field => {
+                if (field.name === 'password1' || field.name === 'password') {
+                    field.addEventListener('input', function() {
+                        const { strength, feedback } = checkPasswordStrength(this.value);
+                        const strengthFill = document.getElementById('strength-fill');
+                        const strengthText = document.getElementById('strength-text');
+                        
+                        if (strengthFill && strengthText) {
+                            strengthFill.className = 'strength-fill';
+                            
+                            if (this.value === '') {
+                                strengthText.textContent = 'Enter password';
+                                return;
+                            }
+                            
+                            switch(strength) {
+                                case 0:
+                                case 1:
+                                    strengthFill.classList.add('strength-weak');
+                                    strengthText.textContent = 'Weak';
+                                    break;
+                                case 2:
+                                case 3:
+                                    strengthFill.classList.add('strength-medium');
+                                    strengthText.textContent = 'Medium';
+                                    break;
+                                case 4:
+                                    strengthFill.classList.add('strength-good');
+                                    strengthText.textContent = 'Good';
+                                    break;
+                                case 5:
+                                    strengthFill.classList.add('strength-strong');
+                                    strengthText.textContent = 'Strong';
+                                    break;
+                            }
+                        }
+                    });
+                }
+            });
+
+            // Form submission with loading state
+            const form = document.getElementById('registerForm');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            form.addEventListener('submit', function() {
+                submitBtn.classList.add('loading');
+                submitBtn.textContent = 'Creating Account';
+            });
+
+            // Input animations
+            const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"]');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.style.transform = 'scale(1.02)';
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.parentElement.style.transform = 'scale(1)';
+                });
+            });
+        });
+    </script>
 </body>
 </html>

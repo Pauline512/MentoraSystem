@@ -1,160 +1,717 @@
 {% extends 'mentorship/base.html' %}
 
-{% block title %}Mentee Dashboard - Mentorship Platform{% endblock %}
+{% block title %}Welcome to Mentora{% endblock %}
 
 {% block extra_head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 <style>
-    
-    .navbar {
-        background-color: #ffffff;
-        padding: 15px 40px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid #e9ecef;
-    }
-    .navbar .logo {
-        font-size: 1.5em;
-        font-weight: bold;
-        color: #007bff; /* Primary blue */
-        text-decoration: none;
-    }
-    .navbar .nav-links a {
-        color: #007bff;
-        text-decoration: none;
-        margin-left: 25px;
-        font-weight: 500;
-        transition: color 0.2s ease-in-out;
-    }
-    .navbar .nav-links a:hover {
-        color: #0056b3;
-    }
-    .hero-section {
-        background-color: #007bff; /* Primary blue background */
-        color: white;
-        text-align: center;
-        padding: 80px 20px;
-        border-bottom-left-radius: 15px;
-        border-bottom-right-radius: 15px;
-    }
-    .hero-section h1 {
-        font-size: 3em;
-        margin-bottom: 20px;
-        font-weight: 700;
-    }
-    .hero-section p {
-        font-size: 1.2em;
-        max-width: 800px;
-        margin: 0 auto 30px auto;
-        opacity: 0.9;
-    }
-    .cta-button {
-        display: inline-block;
-        background-color: #28a745; /* Success green */
-        color: white;
-        padding: 12px 30px;
-        border-radius: 8px;
-        text-decoration: none;
-        font-size: 1.1em;
-        font-weight: 600;
-        transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
-    }
-    .cta-button:hover {
-        background-color: #218838;
-        transform: translateY(-2px);
-    }
-    .features-section {
-        padding: 60px 20px;
-        max-width: 1200px;
-        margin: 0 auto;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 30px;
-    }
-    .feature-card {
-        background-color: white;
-        border: 1px solid #e9ecef;
-        border-radius: 10px;
-        padding: 30px;
-        text-align: center;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-        flex: 1; /* Allows cards to take equal space */
-        min-width: 280px; /* Minimum width before wrapping */
-        max-width: 350px;
-        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    }
-    .feature-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-    }
-    .feature-card h3 {
-        color: #007bff;
-        font-size: 1.5em;
-        margin-bottom: 15px;
-    }
-    .feature-card p {
-        font-size: 0.95em;
-        color: #6c757d;
-    }
-    .footer {
-        background-color: #343a40; /* Dark background */
-        color: white;
-        text-align: center;
-        padding: 30px 20px;
-        margin-top: 50px;
-        font-size: 0.9em;
-    }
-    .footer a {
-        color: #007bff;
-        text-decoration: none;
-    }
-    .footer a:hover {
-        text-decoration: underline;
+    :root {
+        --primary-color: #4f46e5;
+        --primary-hover: #4338ca;
+        --primary-light: #a5b4fc;
+        --secondary-color: #10b981;
+        --secondary-hover: #059669;
+        --accent-color: #f59e0b;
+        --text-dark: #1f2937;
+        --text-light: #6b7280;
+        --background-light: #f9fafb;
+        --white: #ffffff;
+        --border-color: #e5e7eb;
+        --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        --shadow-heavy: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        --font-heading: 'Poppins', sans-serif;
+        --font-body: 'Inter', sans-serif;
+        --border-radius: 16px;
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* Responsive adjustments */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: var(--font-body);
+        color: var(--text-dark);
+        background-color: var(--background-light);
+        line-height: 1.6;
+        overflow-x: hidden;
+    }
+    
+    .landing-container {
+        width: 100%;
+        position: relative;
+    }
+
+    /* Hero Section with Enhanced Visual Appeal */
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 75%, #f5576c 100%);
+        position: relative;
+        color: var(--white);
+        text-align: center;
+        padding: 8rem 1.5rem 6rem;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+    }
+
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        max-width: 900px;
+        animation: fadeInUp 1s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .hero-section h1 {
+        font-family: var(--font-heading);
+        font-size: clamp(2.5rem, 5vw, 4rem);
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        line-height: 1.1;
+        text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        animation: fadeInUp 1s ease-out 0.2s both;
+    }
+
+    .hero-section p {
+        font-size: clamp(1.1rem, 2vw, 1.3rem);
+        max-width: 700px;
+        margin: 0 auto 2.5rem auto;
+        opacity: 0.95;
+        font-weight: 400;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        animation: fadeInUp 1s ease-out 0.4s both;
+    }
+
+    .cta-button {
+        display: inline-block;
+        background: linear-gradient(135deg, var(--white) 0%, #f8fafc 100%);
+        color: var(--primary-color);
+        padding: 1.25rem 3rem;
+        border-radius: 50px;
+        text-decoration: none;
+        font-size: 1.1rem;
+        font-weight: 600;
+        font-family: var(--font-body);
+        transition: var(--transition);
+        box-shadow: var(--shadow-medium);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 1s ease-out 0.6s both;
+        border: 2px solid transparent;
+    }
+
+    .cta-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        transition: left 0.5s;
+    }
+
+    .cta-button:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: var(--shadow-heavy);
+        border-color: rgba(255,255,255,0.3);
+    }
+
+    .cta-button:hover::before {
+        left: 100%;
+    }
+
+    /* Floating elements for visual interest */
+    .floating-shapes {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .shape {
+        position: absolute;
+        opacity: 0.1;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .shape:nth-child(1) {
+        top: 20%;
+        left: 10%;
+        animation-delay: 0s;
+    }
+
+    .shape:nth-child(2) {
+        top: 60%;
+        right: 10%;
+        animation-delay: 2s;
+    }
+
+    .shape:nth-child(3) {
+        bottom: 20%;
+        left: 20%;
+        animation-delay: 4s;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+    }
+    
+    /* Enhanced Features Section */
+    .features-section {
+        padding: 6rem 1.5rem;
+        background: linear-gradient(to bottom, var(--white), var(--background-light));
+        position: relative;
+    }
+
+    .features-section::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+    }
+
+    .section-title {
+        text-align: center;
+        font-family: var(--font-heading);
+        font-size: clamp(2rem, 4vw, 3rem);
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: var(--text-dark);
+        position: relative;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        border-radius: 2px;
+    }
+    
+    .section-subtitle {
+        text-align: center;
+        max-width: 600px;
+        margin: 2rem auto 4rem auto;
+        color: var(--text-light);
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 2.5rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .feature-card {
+        background: var(--white);
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        padding: 2.5rem;
+        text-align: center;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        box-shadow: var(--shadow-light);
+    }
+
+    .feature-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-12px);
+        box-shadow: var(--shadow-heavy);
+        border-color: var(--primary-light);
+    }
+
+    .feature-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .feature-card .icon {
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+        color: var(--white);
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        transition: var(--transition);
+        box-shadow: var(--shadow-medium);
+    }
+
+    .feature-card:hover .icon {
+        transform: scale(1.1) rotate(5deg);
+        box-shadow: var(--shadow-heavy);
+    }
+    
+    .feature-card h3 {
+        font-family: var(--font-heading);
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 1rem;
+        transition: var(--transition);
+    }
+
+    .feature-card:hover h3 {
+        color: var(--primary-color);
+    }
+
+    .feature-card p {
+        color: var(--text-light);
+        line-height: 1.7;
+        font-size: 1rem;
+    }
+
+    /* Enhanced Footer */
+    .footer {
+        background: linear-gradient(135deg, var(--text-dark) 0%, #374151 100%);
+        color: #d1d5db;
+        text-align: center;
+        padding: 4rem 1.5rem 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .footer::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+    }
+
+    .footer-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 2;
+    }
+
+    .footer-brand {
+        font-family: var(--font-heading);
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--white);
+        margin-bottom: 1rem;
+    }
+
+    .footer-links {
+        margin-bottom: 2rem;
+    }
+
+    .footer a {
+        color: var(--primary-light);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+        margin: 0 0.5rem;
+    }
+
+    .footer a:hover {
+        color: var(--white);
+        text-decoration: underline;
+        text-underline-offset: 4px;
+    }
+
+    .footer-copyright {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        border-top: 1px solid #4b5563;
+        padding-top: 2rem;
+    }
+
+    /* Stats Section for non-authenticated users */
+    .stats-section {
+        background: var(--white);
+        padding: 4rem 1.5rem;
+        text-align: center;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .stat-item {
+        padding: 1.5rem;
+    }
+
+    .stat-number {
+        font-family: var(--font-heading);
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: var(--text-light);
+        font-weight: 500;
+    }
+
+    /* Responsive Design */
     @media (max-width: 768px) {
-        .navbar { padding: 15px 20px; }
-        .navbar .nav-links { display: none; } /* Could add a hamburger menu here */
-        .hero-section { padding: 60px 15px; }
-        .hero-section h1 { font-size: 2.5em; }
-        .hero-section p { font-size: 1em; }
-        .features-section { flex-direction: column; align-items: center; }
-        .feature-card { max-width: 90%; }
+        .hero-section {
+            padding: 6rem 1.5rem 4rem;
+            min-height: 80vh;
+        }
+        
+        .features-section {
+            padding: 4rem 1.5rem;
+        }
+        
+        .features-grid {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        
+        .feature-card {
+            padding: 2rem;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 480px) {
+        .cta-button {
+            padding: 1rem 2rem;
+            font-size: 1rem;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Intersection Observer Animation Classes */
+    .fade-in {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.6s ease;
+    }
+
+    .fade-in.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .slide-in-left {
+        opacity: 0;
+        transform: translateX(-50px);
+        transition: all 0.6s ease;
+    }
+
+    .slide-in-left.visible {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .slide-in-right {
+        opacity: 0;
+        transform: translateX(50px);
+        transition: all 0.6s ease;
+    }
+
+    .slide-in-right.visible {
+        opacity: 1;
+        transform: translateX(0);
     }
 </style>
 {% endblock %}
 
 {% block content %}
+<div class="landing-container">
+
     <header class="hero-section">
-        <h1>Unlock Your Potential with Expert Guidance</h1>
-        <p>Connect with experienced mentors who can help you navigate your career, develop new skills, and achieve your personal and professional goals.</p>
-        {% if user.is_authenticated %}
-            <a href="{% url 'mentor_list' %}" class="cta-button">Find Your Mentor Now</a>
-        {% else %}
-            <a href="{% url 'login' %}" class="cta-button">Get Started - Login</a>
-            <a href="{% url 'register' %}" class="cta-button" style="margin-left: 15px;">Register Now</a>
-        {% endif %}
+        <div class="floating-shapes">
+            <div class="shape">⭐</div>
+            <div class="shape">💡</div>
+            <div class="shape">🚀</div>
+        </div>
+        
+        <div class="hero-content">
+            {% if user.mentor %}
+                <h1>Ready to Inspire, {{ user.first_name|default:user.username }}?</h1>
+                <p>Your guidance shapes futures. Manage your mentees, share knowledge, and track progress all in one place.</p>
+                <a href="{% url 'mentor_dashboard' %}" class="cta-button">
+                    <i class="fas fa-chart-line"></i> View Your Dashboard
+                </a>
+
+            {% elif user.mentee %}
+                <h1>Welcome Back, {{ user.first_name|default:user.username }}!</h1>
+                <p>Continue your growth journey. Connect with your mentor, set goals, and unlock your full potential.</p>
+                <a href="{% url 'mentee_dashboard' %}" class="cta-button">
+                    <i class="fas fa-rocket"></i> Go To Your Dashboard
+                </a>
+
+            {% else %}
+                <h1>Unlock Your Potential with Expert Guidance</h1>
+                <p>Connect with experienced mentors who can help you navigate your career, develop new skills, and achieve your personal and professional goals.</p>
+                <a href="{% url 'register' %}" class="cta-button">
+                    <i class="fas fa-star"></i> Get Started For Free
+                </a>
+            {% endif %}
+        </div>
     </header>
 
+    {% if not user.is_authenticated %}
+    <section class="stats-section fade-in">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <span class="stat-number" data-count="1000">0</span>
+                <span class="stat-label">Active Mentors</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" data-count="5000">0</span>
+                <span class="stat-label">Successful Mentorships</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" data-count="50">0</span>
+                <span class="stat-label">Industries Covered</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" data-count="95">0</span>
+                <span class="stat-label">% Success Rate</span>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
     <section class="features-section">
-        <div class="feature-card">
-            <h3>Discover Mentors</h3>
-            <p>Explore a diverse network of professionals across various industries and expertise areas. Find the perfect match for your learning journey.</p>
-        </div>
-        <div class="feature-card">
-            <h3>Personalized Guidance</h3>
-            <p>Receive one-on-one support, tailored advice, and actionable insights to overcome challenges and accelerate your growth.</p>
-        </div>
-        <div class="feature-card">
-            <h3>Achieve Your Goals</h3>
-            <p>Whether it's career advancement, skill development, or personal growth, our mentors are here to help you succeed.</p>
-        </div>
+        {% if user.mentor %}
+            <h2 class="section-title fade-in">Your Mentorship Toolkit</h2>
+            <p class="section-subtitle fade-in">Everything you need to be an effective mentor is right at your fingertips.</p>
+            <div class="features-grid">
+                <div class="feature-card slide-in-left">
+                    <div class="icon"><i class="fa-solid fa-users"></i></div>
+                    <h3>Manage Mentees</h3>
+                    <p>Easily view and respond to mentorship requests from aspiring learners seeking your expertise.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                    <h3>Share Resources</h3>
+                    <p>Upload helpful articles, videos, and documents to your curated resource library.</p>
+                </div>
+                <div class="feature-card slide-in-right">
+                    <div class="icon"><i class="fa-solid fa-calendar-check"></i></div>
+                    <h3>Track Progress</h3>
+                    <p>Set milestones and monitor the growth and success of your mentees over time.</p>
+                </div>
+            </div>
+            
+        {% elif user.mentee %}
+            <h2 class="section-title fade-in">Your Growth Journey</h2>
+            <p class="section-subtitle fade-in">Take advantage of the tools designed to help you succeed.</p>
+            <div class="features-grid">
+                <div class="feature-card slide-in-left">
+                    <div class="icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+                    <h3>Find Your Mentor</h3>
+                    <p>Browse our network of experts and connect with the perfect mentor for your goals.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="icon"><i class="fa-solid fa-list-check"></i></div>
+                    <h3>Track Your Goals</h3>
+                    <p>Work with your mentor to set, track, and achieve your personal and professional objectives.</p>
+                </div>
+                <div class="feature-card slide-in-right">
+                    <div class="icon"><i class="fa-solid fa-book-open-reader"></i></div>
+                    <h3>Access Resources</h3>
+                    <p>Learn from a curated library of resources shared by our expert mentors.</p>
+                </div>
+            </div>
+
+        {% else %}
+            <h2 class="section-title fade-in">How It Works</h2>
+            <p class="section-subtitle fade-in">We make connecting with the right mentor simple, effective, and rewarding.</p>
+            <div class="features-grid">
+                <div class="feature-card slide-in-left">
+                    <div class="icon"><i class="fa-solid fa-user-plus"></i></div>
+                    <h3>Discover Mentors</h3>
+                    <p>Explore a diverse network of professionals across various industries and expertise areas.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="icon"><i class="fa-solid fa-handshake-angle"></i></div>
+                    <h3>Personalized Guidance</h3>
+                    <p>Receive one-on-one support and tailored advice to accelerate your growth journey.</p>
+                </div>
+                <div class="feature-card slide-in-right">
+                    <div class="icon"><i class="fa-solid fa-trophy"></i></div>
+                    <h3>Achieve Your Goals</h3>
+                    <p>Our mentors are here to help you succeed in your career and personal development.</p>
+                </div>
+            </div>
+        {% endif %}
     </section>
 
     <footer class="footer">
-        <p>&copy; {% now "Y" %} MentorshipPro. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+        <div class="footer-content">
+            <div class="footer-brand">Mentora</div>
+            <div class="footer-links">
+                <a href="#">About Us</a>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Contact</a>
+                <a href="#">Help Center</a>
+            </div>
+            <div class="footer-copyright">
+                <p>&copy; {% now "Y" %} Mentora. All rights reserved. Empowering growth through mentorship.</p>
+            </div>
+        </div>
     </footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Intersection Observer for animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    // Observe all elements with animation classes
+    document.querySelectorAll('.fade-in, .slide-in-left, .slide-in-right').forEach(el => {
+        observer.observe(el);
+    });
+
+    // Animated counter for stats
+    function animateCounter(element, target, duration = 2000) {
+        let start = 0;
+        const increment = target / (duration / 16);
+        
+        function updateCounter() {
+            start += increment;
+            if (start < target) {
+                element.textContent = Math.floor(start);
+                requestAnimationFrame(updateCounter);
+            } else {
+                element.textContent = target;
+            }
+        }
+        
+        updateCounter();
+    }
+
+    // Trigger counter animation when stats section is visible
+    const statsObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const counters = entry.target.querySelectorAll('.stat-number');
+                counters.forEach(counter => {
+                    const target = parseInt(counter.getAttribute('data-count'));
+                    animateCounter(counter, target);
+                });
+                statsObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.5 });
+
+    const statsSection = document.querySelector('.stats-section');
+    if (statsSection) {
+        statsObserver.observe(statsSection);
+    }
+
+    // Enhanced CTA button interaction
+    const ctaButton = document.querySelector('.cta-button');
+    if (ctaButton) {
+        ctaButton.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-3px) scale(1.05)';
+        });
+        
+        ctaButton.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    }
+
+    // Smooth scrolling for internal links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

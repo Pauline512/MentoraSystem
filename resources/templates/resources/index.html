@@ -236,7 +236,7 @@
             </div>
             
             {% if user.is_authenticated and user.mentor %}
-                <a href="{% url 'resources:upload' %}" class="upload-btn">
+                <a href="{% url 'resources:upload_resource' %}" class="upload-btn">
                     <i class="fas fa-cloud-upload-alt"></i> Upload New Resource
                 </a>
             {% endif %}

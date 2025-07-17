@@ -153,6 +153,7 @@
                 {% csrf_token %}
                 
                 {% for field in form %}
+                    {% if field.name != 'mentor' %}
                     <div class="form-group">
                         <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                         {{ field }}
@@ -163,6 +164,7 @@
                             {{ field.errors }}
                         {% endif %}
                     </div>
+                    {% endif %}
                 {% endfor %}
                 
                 <div class="form-actions">

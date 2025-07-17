@@ -1,0 +1,70 @@
+{% extends 'mentorship/base.html' %}
+
+{% block title %}Update Profile{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <h2>Update Your Profile</h2>
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <form method="post" enctype="multipart/form-data" style="max-width:600px;margin:auto;">
+        {% csrf_token %}
+        <h3>Account Info</h3>
+        {% for field in user_form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+                {% if field.errors %}
+                    <ul class="errorlist">
+                        {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        {% endfor %}
+        {% if is_mentee and mentee_form %}
+            <h3>Mentee Profile</h3>
+            {% for field in mentee_form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+                    {% if field.errors %}
+                        <ul class="errorlist">
+                            {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% endif %}
+        {% if is_mentor and mentor_form %}
+            <h3>Mentor Profile</h3>
+            {% for field in mentor_form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+                    {% if field.errors %}
+                        <ul class="errorlist">
+                            {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% endif %}
+        <button type="submit" class="btn btn-primary" style="margin-top:1rem;">Save Changes</button>
+        <a href="{% url 'my_profile' %}" class="btn btn-secondary" style="margin-top:1rem; margin-left:1rem; background:#64748b; color:#fff; border-radius:0.5rem; text-decoration:none; padding:0.5rem 1.5rem;">Cancel</a>
+    </form>
+</div>
+{% endblock %} 

@@ -2,9 +2,10 @@ from django.utils import timezone
 from django.contrib import messages #for user feedback
 from django.db import transaction # for atomic updates
 from django.contrib.auth.decorators import login_required 
-from .models import Mentor, Mentee, Interest,MentorshipRequest,Notification,Message, User, Session # Import Session model
-from .forms import MentorshipRequestForm, MessageForm , SessionForm, UserRegistrationForm# Importing forms
+from .models import Mentor, Mentee, Interest,MentorshipRequest,Notification,Message, User, Session, Feedback, MentorEvaluation # Import Session model
+from .forms import MentorshipRequestForm, MessageForm , SessionForm, UserRegistrationForm, MenteeRegistrationForm, MentorRegistrationForm, UserProfileUpdateForm, FeedbackForm, MentorEvaluationForm # Importing forms
 from django.db.models import Q # for complex queries
+from django.contrib.auth import update_session_auth_hash
 
 
 from django.shortcuts import render, get_object_or_404,redirect # # render HTML templates, get entity objects, redirect user
@@ -187,26 +188,35 @@ def mentee_landing(request):
 
 def register_user(request):
     if request.method == 'POST':
-        form = UserRegistrationForm(request.POST)
-        if form.is_valid():
-            user = form.save(commit=False)
+        user_form = UserRegistrationForm(request.POST)
+        role = request.POST.get('role')
+        mentee_form = MenteeRegistrationForm(request.POST, request.FILES) if role == 'mentee' else None
+        mentor_form = MentorRegistrationForm(request.POST, request.FILES) if role == 'mentor' else None
+        if user_form.is_valid() and ((role == 'mentee' and mentee_form.is_valid()) or (role == 'mentor' and mentor_form.is_valid()) or (role == 'admin')):
+            user = user_form.save(commit=False)
             user.save()
-
-            role = form.cleaned_data['role']
+            role = user_form.cleaned_data['role']
             if role == 'mentee':
-                Mentee.objects.create(user=user)
+                mentee = mentee_form.save(commit=False)
+                mentee.user = user
+                mentee.save()
+                mentee_form.save_m2m()
             elif role == 'mentor':
-                Mentor.objects.create(user=user)
+                mentor = mentor_form.save(commit=False)
+                mentor.user = user
+                mentor.save()
+                mentor_form.save_m2m()
             elif role == 'admin':
                 user.is_staff = True
                 user.is_superuser = True
                 user.save()
-            
             messages.success(request, 'Registration successful! Please log in.')
             return redirect('login') # Redirect to login page
     else:
-        form = UserRegistrationForm()
-    return render(request, 'registration/register.html', {'form': form})
+        user_form = UserRegistrationForm()
+        mentee_form = MenteeRegistrationForm()
+        mentor_form = MentorRegistrationForm()
+    return render(request, 'registration/register.html', {'user_form': user_form, 'mentee_form': mentee_form, 'mentor_form': mentor_form})
 
 
 
@@ -438,6 +448,15 @@ def mentee_dashboard(request):
     else:
         requests_for_display = all_requests.filter(status=status_filter.upper())
 
+    # Annotate each request with can_provide_feedback for the template
+    for req in requests_for_display:
+        session = req.sessions.first() if req.sessions.exists() else None
+        can_provide_feedback = False
+        if session and session.status == 'COMPLETED':
+            can_provide_feedback = not Feedback.objects.filter(session=session, mentee=mentee_profile).exists()
+        req.can_provide_feedback = can_provide_feedback
+        req.completed_session = session if session and session.status == 'COMPLETED' else None
+
     context = {
         'total_requests_count': total_requests_count,
         'pending_count': pending_count,
@@ -635,6 +654,82 @@ def message_thread(request, request_pk, recipient_pk):
     return render(request, 'mentorship/message_thread.html', context)
 
 @login_required
+def provide_feedback(request, session_pk):
+    session = get_object_or_404(Session, pk=session_pk)
+    # Only the mentee who attended the session can provide feedback
+    if not hasattr(request.user, 'mentee') or session.mentorship_request.mentee != request.user.mentee:
+        messages.error(request, "You are not authorized to provide feedback for this session.")
+        return redirect('mentee_dashboard')
+    # Only allow feedback for completed sessions
+    if session.status != 'COMPLETED':
+        messages.warning(request, "You can only provide feedback for completed sessions.")
+        return redirect('mentee_dashboard')
+    # Prevent duplicate feedback
+    from .models import Feedback
+    if Feedback.objects.filter(session=session, mentee=request.user.mentee).exists():
+        messages.info(request, "You have already provided feedback for this session.")
+        return redirect('mentee_dashboard')
+    if request.method == 'POST':
+        form = FeedbackForm(request.POST)
+        if form.is_valid():
+            feedback = form.save(commit=False)
+            feedback.session = session
+            feedback.mentor = session.mentorship_request.mentor
+            feedback.mentee = session.mentorship_request.mentee
+            feedback.save()
+            messages.success(request, "Thank you for your feedback!")
+            return redirect('mentee_dashboard')
+        else:
+            messages.error(request, "Please correct the errors in the feedback form.")
+    else:
+        form = FeedbackForm()
+    context = {
+        'form': form,
+        'session': session,
+        'mentor': session.mentorship_request.mentor,
+        'session_date': session.start_time,
+    }
+    return render(request, 'mentorship/provide_feedback.html', context)
+
+@login_required
+def mentor_evaluate_mentee(request, session_pk):
+    session = get_object_or_404(Session, pk=session_pk)
+    mentor = session.mentorship_request.mentor
+    mentee = session.mentorship_request.mentee
+    # Only the mentor for this session can evaluate
+    if not hasattr(request.user, 'mentor') or request.user.mentor != mentor:
+        messages.error(request, "You are not authorized to evaluate this session.")
+        return redirect('mentor_dashboard')
+    # Prevent duplicate evaluation
+    from .models import MentorEvaluation
+    if MentorEvaluation.objects.filter(session=session, mentor=mentor, mentee=mentee).exists():
+        messages.info(request, "You have already submitted an evaluation for this session.")
+        return redirect('mentor_dashboard')
+    if request.method == 'POST':
+        form = MentorEvaluationForm(request.POST)
+        if form.is_valid():
+            evaluation = form.save(commit=False)
+            evaluation.session = session
+            evaluation.mentor = mentor
+            evaluation.mentee = mentee
+            evaluation.save()
+            messages.success(request, "Evaluation submitted successfully!")
+            return redirect('mentor_dashboard')
+        else:
+            messages.error(request, "Please correct the errors in the evaluation form.")
+    else:
+        form = MentorEvaluationForm(initial={
+            'evaluation_date': session.start_time.date(),
+        })
+    context = {
+        'form': form,
+        'session': session,
+        'mentee': mentee,
+        'session_date': session.start_time,
+    }
+    return render(request, 'mentorship/mentor_evaluate_mentee.html', context)
+
+@login_required
 def dashboard_redirect(request):
     if hasattr(request.user, 'mentee'):
         return redirect('mentee_dashboard')
@@ -648,8 +743,23 @@ def dashboard_redirect(request):
 
 @login_required
 def mentor_dashboard(request):
-    # Placeholder for mentor-specific logic
-    return render(request, 'mentorship/mentor_dashboard.html', {'message': 'Welcome to your Mentor Dashboard!'})
+    mentor_profile = None
+    if hasattr(request.user, 'mentor'):
+        mentor_profile = request.user.mentor
+    # Get all sessions for this mentor (fix: use mentorship_request__mentor)
+    all_sessions = Session.objects.filter(mentorship_request__mentor=mentor_profile).order_by('-start_time') 
+    # Annotate each session with can_evaluate_mentee
+    for session in all_sessions:
+        mentee = session.mentorship_request.mentee
+        session.can_evaluate_mentee = (
+            session.status == 'COMPLETED' and
+            not MentorEvaluation.objects.filter(session=session, mentor=mentor_profile, mentee=mentee).exists()
+        )
+    context = {
+        'all_sessions': all_sessions,
+        'message': 'Welcome to your Mentor Dashboard!',
+    }
+    return render(request, 'mentorship/mentor_dashboard.html', context)
 
 @login_required
 def admin_dashboard(request):
@@ -657,7 +767,14 @@ def admin_dashboard(request):
     if not request.user.is_staff and not request.user.is_superuser:
         messages.error(request, "You are not authorized to view the admin dashboard.")
         return redirect('home')
-    return render(request, 'mentorship/admin_dashboard.html', {'message': 'Welcome to your Admin Dashboard!'})
+    feedback_reports = Feedback.objects.select_related('session', 'mentor', 'mentee').order_by('-session__start_time')
+    mentor_evaluations = MentorEvaluation.objects.select_related('session', 'mentor', 'mentee').order_by('-session__start_time')
+    context = {
+        'message': 'Welcome to your Admin Dashboard!',
+        'feedback_reports': feedback_reports,
+        'mentor_evaluations': mentor_evaluations,
+    }
+    return render(request, 'mentorship/admin_dashboard.html', context)
 
 @login_required
 def my_profile(request):
@@ -684,3 +801,63 @@ def my_profile(request):
         context['mentors_interacted'] = MentorshipRequest.objects.filter(mentee=mentee_profile).values_list('mentor__user__username', flat=True).distinct()
 
     return render(request, 'mentorship/my_profile.html', context)
+
+@login_required
+def update_profile(request):
+    user = request.user
+    # Determine role
+    is_mentee = hasattr(user, 'mentee')
+    is_mentor = hasattr(user, 'mentor')
+    user_form = UserProfileUpdateForm(request.POST or None, instance=user)
+    mentee_form = None
+    mentor_form = None
+    profile_updated = False
+    if is_mentee:
+        mentee = user.mentee
+        mentee_form = MenteeRegistrationForm(request.POST or None, request.FILES or None, instance=mentee)
+    if is_mentor:
+        mentor = user.mentor
+        mentor_form = MentorRegistrationForm(request.POST or None, request.FILES or None, instance=mentor)
+    if request.method == 'POST':
+        valid = user_form.is_valid()
+        if is_mentee:
+            valid = valid and mentee_form.is_valid()
+        if is_mentor:
+            valid = valid and mentor_form.is_valid()
+        if valid:
+            user_form.save()
+            if user_form.cleaned_data.get('password'):
+                update_session_auth_hash(request, user)  # Keep user logged in after password change
+            if is_mentee:
+                mentee_form.save()
+                mentee_form.save_m2m()
+            if is_mentor:
+                mentor_form.save()
+                mentor_form.save_m2m()
+            messages.success(request, 'Profile updated successfully!')
+            return redirect('my_profile')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    context = {
+        'user_form': user_form,
+        'mentee_form': mentee_form,
+        'mentor_form': mentor_form,
+        'is_mentee': is_mentee,
+        'is_mentor': is_mentor,
+    }
+    return render(request, 'mentorship/update_profile.html', context)
+
+@login_required
+def mentor_complete_session(request, session_pk):
+    session = get_object_or_404(Session, pk=session_pk)
+    # Only the mentor assigned to the session can mark it as completed
+    if request.user != session.mentor.user:
+        messages.error(request, "You are not authorized to complete this session.")
+        return redirect('mentor_dashboard')
+    if session.status != 'COMPLETED':
+        session.status = 'COMPLETED'
+        session.save()
+        messages.success(request, "Session marked as completed.")
+    else:
+        messages.info(request, "Session was already marked as completed.")
+    return redirect('mentor_dashboard')

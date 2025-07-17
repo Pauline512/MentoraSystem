@@ -4,6 +4,60 @@
 
 {% block dashboard_content %}
     <h1>{{ message }}</h1>
-    <p>This is the placeholder for the admin dashboard content.</p>
+    <h2>Feedback Reports (Mentee → Mentor/Session)</h2>
+    {% if feedback_reports %}
+        <table style="width:100%;margin-bottom:2rem;border-collapse:collapse;">
+            <thead>
+                <tr style="background:#f8fafc;">
+                    <th style="padding:8px;">Session Date</th>
+                    <th style="padding:8px;">Mentee</th>
+                    <th style="padding:8px;">Mentor</th>
+                    <th style="padding:8px;">Session Rating</th>
+                    <th style="padding:8px;">Key Takeaways</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for feedback in feedback_reports %}
+                <tr style="border-bottom:1px solid #e2e8f0;">
+                    <td style="padding:8px;">{{ feedback.session.start_time|date:"M d, Y H:i" }}</td>
+                    <td style="padding:8px;">{{ feedback.mentee.user.get_full_name|default:feedback.mentee.user.username }}</td>
+                    <td style="padding:8px;">{{ feedback.mentor.user.get_full_name|default:feedback.mentor.user.username }}</td>
+                    <td style="padding:8px;">{{ feedback.session_rating }}</td>
+                    <td style="padding:8px;">{{ feedback.key_takeaways|truncatechars:50 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No feedback reports found.</p>
+    {% endif %}
+
+    <h2>Mentor Evaluations (Mentor → Mentee/Session)</h2>
+    {% if mentor_evaluations %}
+        <table style="width:100%;margin-bottom:2rem;border-collapse:collapse;">
+            <thead>
+                <tr style="background:#f8fafc;">
+                    <th style="padding:8px;">Session Date</th>
+                    <th style="padding:8px;">Mentor</th>
+                    <th style="padding:8px;">Mentee</th>
+                    <th style="padding:8px;">Overall Evaluation</th>
+                    <th style="padding:8px;">Strengths</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for eval in mentor_evaluations %}
+                <tr style="border-bottom:1px solid #e2e8f0;">
+                    <td style="padding:8px;">{{ eval.session.start_time|date:"M d, Y H:i" }}</td>
+                    <td style="padding:8px;">{{ eval.mentor.user.get_full_name|default:eval.mentor.user.username }}</td>
+                    <td style="padding:8px;">{{ eval.mentee.user.get_full_name|default:eval.mentee.user.username }}</td>
+                    <td style="padding:8px;">{{ eval.get_overall_evaluation_display }}</td>
+                    <td style="padding:8px;">{{ eval.strengths|truncatechars:50 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No mentor evaluations found.</p>
+    {% endif %}
     <p><a href="/admin/">Go to Django Admin</a></p>
 {% endblock %}

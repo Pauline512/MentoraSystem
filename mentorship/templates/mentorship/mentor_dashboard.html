@@ -103,6 +103,49 @@
                 <p class="empty-state">No upcoming sessions scheduled</p>
             {% endif %}
         </section>
+        <section class="dashboard-section all-sessions">
+            <h2><i class="fas fa-list"></i> All Sessions</h2>
+            {% if all_sessions %}
+                <div class="session-list">
+                    {% for session in all_sessions %}
+                        <div class="session-card">
+                            <div class="session-info">
+                                <h3>Session with {{ session.mentee.user.get_full_name }}</h3>
+                                <p>
+                                    <i class="fas fa-clock"></i>
+                                    {{ session.start_time|date:"M d, Y H:i" }}
+                                </p>
+                                <p>
+                                    <i class="fas fa-video"></i>
+                                    {{ session.meeting_link|default:"In-person meeting" }}
+                                </p>
+                                <p>
+                                    <strong>Status:</strong> {{ session.get_status_display }}
+                                </p>
+                            </div>
+                            <div class="session-actions">
+                                {% if session.can_evaluate_mentee %}
+                                    <a href="{% url 'mentor_evaluate_mentee' session_pk=session.pk %}" class="btn btn-primary" style="background:#f59e0b; color:#fff;">
+                                        <i class="fas fa-star"></i> Evaluate Mentee
+                                    </a>
+                                {% endif %}
+                                {% if session.status != 'COMPLETED' %}
+                                    <a href="{% url 'mentor_complete_session' session_pk=session.pk %}" class="btn btn-success">
+                                        <i class="fas fa-check"></i> Mark as Completed
+                                    </a>
+                                {% else %}
+                                    <span class="btn btn-secondary" style="background:#e2e8f0; color:#64748b; cursor:default;">
+                                        <i class="fas fa-check-circle"></i> Completed
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="empty-state">No sessions found</p>
+            {% endif %}
+        </section>
     </div>
 </div>
 

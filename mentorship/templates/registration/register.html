@@ -324,10 +324,11 @@
             </ul>
         {% endif %}
         
-        <form method="post" id="registerForm">
+        <form method="post" id="registerForm" enctype="multipart/form-data">
             {% csrf_token %}
-            {% for field in form %}
-                <div class="form-group">
+            <!-- User fields -->
+            {% for field in user_form %}
+                <div class="form-group" id="user-field-{{ field.name }}">
                     <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                     {% if field.name == 'role' %}
                         <div class="radio-group">
@@ -358,6 +359,45 @@
                     {% endif %}
                 </div>
             {% endfor %}
+
+            <!-- Mentee fields -->
+            <div id="mentee-fields" style="display:none;">
+                <h3 style="margin-bottom:10px;">Mentee Details</h3>
+                {% for field in mentee_form %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+                        {% if field.errors %}
+                            <ul class="errorlist">
+                                {% for error in field.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Mentor fields -->
+            <div id="mentor-fields" style="display:none;">
+                <h3 style="margin-bottom:10px;">Mentor Details</h3>
+                {% for field in mentor_form %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+                        {% if field.errors %}
+                            <ul class="errorlist">
+                                {% for error in field.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+
             <button type="submit" id="submitBtn">Create Account</button>
         </form>
         
@@ -454,6 +494,30 @@
                     this.parentElement.style.transform = 'scale(1)';
                 });
             });
+
+            // Role-based field toggling
+            function toggleRoleFields() {
+                var role = document.querySelector('input[name="role"]:checked');
+                var menteeFields = document.getElementById('mentee-fields');
+                var mentorFields = document.getElementById('mentor-fields');
+                if (role) {
+                    if (role.value === 'mentee') {
+                        menteeFields.style.display = '';
+                        mentorFields.style.display = 'none';
+                    } else if (role.value === 'mentor') {
+                        menteeFields.style.display = 'none';
+                        mentorFields.style.display = '';
+                    } else {
+                        menteeFields.style.display = 'none';
+                        mentorFields.style.display = 'none';
+                    }
+                }
+            }
+            var roleRadios = document.querySelectorAll('input[name="role"]');
+            roleRadios.forEach(function(radio) {
+                radio.addEventListener('change', toggleRoleFields);
+            });
+            toggleRoleFields(); // Initial call
         });
     </script>
 </body>

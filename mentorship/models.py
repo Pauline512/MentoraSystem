@@ -83,16 +83,6 @@ class MentorshipRequest(models.Model):
     rejection_reason = models.TextField(blank=True, null=True)
     is_session_scheduled = models.BooleanField(default=False) 
 
-    class Meta:
-        unique_together = ('mentee', 'mentor', 'status')
-        constraints = [
-            models.UniqueConstraint(
-                fields=['mentee', 'mentor'],
-                condition=models.Q(status__in=['PENDING', 'ACCEPTED']),
-                name='unique_pending_or_accepted_request'
-            )
-        ]
-
     def __str__(self):
         return f"Request from {self.mentee.user.username} to {self.mentor.user.username} ({self.status})"
 

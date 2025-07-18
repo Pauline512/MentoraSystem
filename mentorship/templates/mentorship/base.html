@@ -45,7 +45,7 @@
             margin: 0;
             padding: 0;
             background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            color: var(--text-dark);
+            color: #1e293b;
             line-height: 1.6;
             display: flex;
             min-height: 100vh;
@@ -54,19 +54,19 @@
 
         /* Sidebar Styling */
         .sidebar {
-            width: var(--sidebar-width);
-            background: linear-gradient(145deg, var(--surface) 0%, #fefefe 100%);
-            color: var(--text-dark);
+            width: 280px;
+            background: linear-gradient(145deg, #ffffff 0%, #fefefe 100%);
+            color: #1e293b;
             padding: 28px 24px;
-            box-shadow: var(--shadow-lg);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.05);
             height: 100vh;
             position: fixed;
             top: 0;
             left: 0;
             overflow-y: auto;
-            border-right: 1px solid var(--border);
+            border-right: 1px solid #e2e8f0;
             z-index: 1000;
-            transition: var(--transition);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .sidebar::-webkit-scrollbar {
@@ -78,14 +78,14 @@
         }
 
         .sidebar::-webkit-scrollbar-thumb {
-            background: var(--border);
+            background: #e2e8f0;
             border-radius: 2px;
         }
 
         .sidebar .logo {
             font-size: 1.75rem;
             font-weight: 700;
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -95,20 +95,20 @@
             gap: 12px;
             margin-bottom: 40px;
             padding: 16px 12px;
-            border-radius: var(--border-radius);
-            transition: var(--transition);
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .sidebar .logo:hover {
             transform: translateY(-2px);
-            background: var(--surface-hover);
+            background: #f1f5f9;
             -webkit-text-fill-color: initial;
-            color: var(--primary-color);
+            color: #6366f1;
         }
 
         .sidebar .logo i {
             font-size: 28px;
-            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            background: linear-gradient(135deg, #6366f1, #f59e0b);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -123,7 +123,7 @@
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: var(--text-muted);
+            color: #94a3b8;
             margin-bottom: 12px;
             padding: 0 16px;
         }
@@ -139,12 +139,12 @@
             display: flex;
             align-items: center;
             gap: 14px;
-            color: var(--text-dark);
+            color: #1e293b;
             text-decoration: none;
             padding: 14px 16px;
             margin-bottom: 4px;
-            border-radius: var(--border-radius);
-            transition: var(--transition);
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             font-weight: 500;
             width: 100%;
             text-align: left;
@@ -163,9 +163,9 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
             opacity: 0;
-            transition: var(--transition);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: -1;
         }
 
@@ -176,15 +176,15 @@
 
         .sidebar .nav-links a:hover,
         .sidebar .nav-links button:hover {
-            color: var(--surface);
+            color: #ffffff;
             transform: translateX(4px);
-            box-shadow: var(--shadow-md);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.06);
         }
 
         .sidebar .nav-links a.active {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-            color: var(--surface);
-            box-shadow: var(--shadow-md);
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: #ffffff;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.06);
         }
 
         .sidebar .nav-links a i,
@@ -192,7 +192,7 @@
             font-size: 18px;
             width: 24px;
             text-align: center;
-            transition: var(--transition);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .sidebar .nav-links a:hover i,
@@ -207,21 +207,21 @@
             top: 20px;
             left: 20px;
             z-index: 1001;
-            background: var(--surface);
+            background: #ffffff;
             border: none;
             border-radius: 50%;
             width: 48px;
             height: 48px;
-            box-shadow: var(--shadow-md);
-            color: var(--primary-color);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.06);
+            color: #6366f1;
             font-size: 18px;
             cursor: pointer;
-            transition: var(--transition);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .mobile-menu-toggle:hover {
             transform: scale(1.05);
-            box-shadow: var(--shadow-lg);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.05);
         }
 
         /* Main Content Area */
@@ -230,7 +230,7 @@
             flex-grow: 1;
             padding: 40px;
             width: calc(100% - var(--sidebar-width));
-            transition: var(--transition);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         /* Messages Styling */
@@ -242,19 +242,19 @@
 
         .messages li {
             padding: 20px 24px;
-            border-radius: var(--border-radius);
+            border-radius: 12px;
             margin-bottom: 12px;
             display: flex;
             align-items: center;
             gap: 16px;
-            box-shadow: var(--shadow-md);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.06);
             font-weight: 500;
             position: relative;
             overflow: hidden;
             animation: slideInDown 0.5s ease-out;
         }
 
-        @keyframes slideInDown {
+        /* @keyframes slideInDown {
             from {
                 opacity: 0;
                 transform: translateY(-20px);
@@ -263,30 +263,30 @@
                 opacity: 1;
                 transform: translateY(0);
             }
-        }
+        } */
 
         .messages .success {
             background: linear-gradient(135deg, #f0fdf4, #dcfce7);
             color: #166534;
-            border-left: 4px solid var(--success);
+            border-left: 4px solid #10b981;
         }
 
         .messages .error {
             background: linear-gradient(135deg, #fef2f2, #fee2e2);
             color: #991b1b;
-            border-left: 4px solid var(--error);
+            border-left: 4px solid #ef4444;
         }
 
         .messages .info {
             background: linear-gradient(135deg, #eff6ff, #dbeafe);
             color: #1e40af;
-            border-left: 4px solid var(--info);
+            border-left: 4px solid #3b82f6;
         }
 
         .messages .warning {
             background: linear-gradient(135deg, #fffbeb, #fef3c7);
             color: #92400e;
-            border-left: 4px solid var(--warning);
+            border-left: 4px solid #f59e0b;
         }
 
         .messages .close-btn {
@@ -297,7 +297,7 @@
             cursor: pointer;
             color: inherit;
             opacity: 0.7;
-            transition: var(--transition);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             padding: 4px;
             border-radius: 4px;
         }
@@ -309,59 +309,57 @@
 
         /* Notification Badge */
         .notification-badge {
-            background: linear-gradient(135deg, var(--error), #dc2626);
-            color: var(--surface);
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: #ffffff;
             border-radius: 12px;
             padding: 4px 8px;
             font-size: 11px;
             font-weight: 600;
             margin-left: 8px;
-            box-shadow: var(--shadow-sm);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.8;
-            }
+            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            /* @keyframes pulse {
+                0%, 100% {
+                    opacity: 1;
+                }
+                50% {
+                    opacity: 0.8;
+                }
+            } */
         }
 
         /* Content Header */
         .content-header {
             margin-bottom: 32px;
             padding-bottom: 24px;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid #e2e8f0;
         }
 
         .content-header h1 {
             margin: 0 0 8px 0;
             font-size: 2rem;
             font-weight: 700;
-            color: var(--text-dark);
+            color: #1e293b;
         }
 
         .content-header p {
             margin: 0;
-            color: var(--text-light);
+            color: #64748b;
             font-size: 1.1rem;
         }
 
         /* Card Styling */
         .card {
-            background: var(--surface);
-            border-radius: var(--border-radius);
+            background: #ffffff;
+            border-radius: 12px;
             padding: 24px;
-            box-shadow: var(--shadow-md);
-            border: 1px solid var(--border);
-            transition: var(--transition);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.06);
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .card:hover {
             transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.05);
         }
 
         /* Responsive Design */
@@ -412,7 +410,7 @@
         /* Focus States for Accessibility */
         .sidebar .nav-links a:focus,
         .sidebar .nav-links button:focus {
-            outline: 2px solid var(--primary-color);
+            outline: 2px solid #6366f1;
             outline-offset: 2px;
         }
 
@@ -495,7 +493,7 @@
                         <i class="fas fa-user-circle"></i>My Profile
                     </a>
                     
-                    <div style="border-top: 1px solid var(--border); margin: 20px 0; padding-top: 20px;">
+                    <div style="border-top: 1px solid #e2e8f0; margin: 20px 0; padding-top: 20px;">
                         <form action="{% url 'logout' %}" method="post">
                             {% csrf_token %}
                             <button type="submit">

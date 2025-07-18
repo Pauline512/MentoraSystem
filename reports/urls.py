@@ -5,5 +5,5 @@ app_name = 'reports'
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('download-mentorship-report-csv/', views.download_mentorship_report_csv, name='download_mentorship_report_csv'),
+    path('unified-report/', views.unified_report_view, name='unified_report'),
 ]

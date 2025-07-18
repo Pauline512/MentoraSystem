@@ -131,6 +131,7 @@ class Session(models.Model):
         related_name='sessions'
     )
 
+    topic = models.CharField(max_length=255, blank=True, null=True) # Added topic field
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
 

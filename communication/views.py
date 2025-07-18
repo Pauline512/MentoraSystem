@@ -33,3 +33,47 @@ def index(request):
     conversations.sort(key=lambda x: x['last_message'].timestamp if x['last_message'] else x['request'].request_date, reverse=True)
 
     return render(request, 'communication/message_list.html', {'conversations': conversations})
+
+@login_required
+def message_thread(request, request_pk, recipient_pk):
+    mentorship_request = get_object_or_404(MentorshipRequest, pk=request_pk)
+    other_party = get_object_or_404(User, pk=recipient_pk)
+
+    # Ensure the current user is part of this mentorship request
+    if not (request.user == mentorship_request.mentee.user or request.user == mentorship_request.mentor.user):
+        messages.error(request, "You are not authorized to view this conversation.")
+        return redirect('communication:index')
+
+    messages_in_thread = Message.objects.filter(
+        mentorship_request=mentorship_request
+    ).order_by('timestamp')
+
+    # Mark messages sent to the current user as read
+    messages_in_thread.filter(recipient=request.user, is_read=False).update(is_read=True)
+
+    if request.method == 'POST':
+        content = request.POST.get('content')
+        if content:
+            Message.objects.create(
+                sender=request.user,
+                recipient=other_party,
+                content=content,
+                mentorship_request=mentorship_request
+            )
+            # Optionally, create a notification for the recipient
+            # Notification.objects.create(
+            #     recipient=other_party,
+            #     message=f"New message from {request.user.username}",
+            #     notification_type='GENERAL',
+            #     related_request=mentorship_request
+            # )
+            return redirect('communication:message_thread', request_pk=request_pk, recipient_pk=recipient_pk)
+        else:
+            messages.error(request, "Message content cannot be empty.")
+
+    context = {
+        'mentorship_request': mentorship_request,
+        'other_party': other_party,
+        'messages': messages_in_thread,
+    }
+    return render(request, 'communication/message_thread.html', context)

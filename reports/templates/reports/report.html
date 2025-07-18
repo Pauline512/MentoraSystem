@@ -1,4 +1,4 @@
-{% extends 'core/base.html' %}
+{% extends 'mentorship/base.html' %}
 
 {% block title %}Unified Report{% endblock %}
 
@@ -123,6 +123,7 @@
 {% endblock %}
 
 {% block extra_js %}
+{% comment %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -173,4 +174,5 @@
         });
     });
 </script>
+{% endcomment %}
 {% endblock %}

@@ -8,7 +8,7 @@
 
     {% if user.is_staff or user.is_superuser %}
         <div class="report-actions">
-            <a href="{% url 'reports:download_mentorship_report_csv' %}" class="btn btn-primary">Download Mentorship Report (CSV)</a>
+            <a href="{% url 'reports:unified_report' %}" class="btn btn-primary">View Unified Report</a>
         </div>
     {% endif %}
 

@@ -17,7 +17,8 @@ class Mentee(models.Model):
     interests = models.ManyToManyField(Interest, related_name='mentees', blank=True) # Mentees have interests (skill tags)
     bio = models.TextField(blank=True, null=True)
     profile_picture = models.ImageField(upload_to='mentee_pics/', blank=True, null=True)
-
+    contact = models.CharField(max_length=100, blank=True, null=True)  # New field for contact info
+    
     def __str__(self):
         return self.user.username
 
@@ -53,6 +54,7 @@ class Mentor(models.Model):
     
     bio = models.TextField(blank=True, null=True)
     profile_picture = models.ImageField(upload_to='mentor_pics/', blank=True, null=True)
+    contact = models.CharField(max_length=100, blank=True, null=True)  # New field for contact info
 
     def __str__(self):
         # Display mentor by their full name if available, otherwise username
@@ -216,3 +218,103 @@ class Message(models.Model):
 
     def __str__(self):
         return f"From {self.sender.username} to {self.recipient.username}: {self.content[:50]}..."
+
+class Feedback(models.Model):
+    session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='feedbacks')
+    mentor = models.ForeignKey(Mentor, on_delete=models.CASCADE, related_name='feedbacks')
+    mentee = models.ForeignKey(Mentee, on_delete=models.CASCADE, related_name='feedbacks')
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    # Session feedback
+    session_rating = models.PositiveSmallIntegerField(choices=[(i, str(i)) for i in range(1, 6)])
+    content_clarity = models.CharField(max_length=10, choices=[('yes', 'Yes'), ('no', 'No'), ('neutral', 'Neutral')])
+    relevance = models.CharField(max_length=10, choices=[('yes', 'Yes'), ('no', 'No'), ('neutral', 'Neutral')])
+    structure = models.CharField(max_length=10, choices=[('yes', 'Yes'), ('no', 'No'), ('neutral', 'Neutral')])
+
+    # Mentor feedback
+    mentor_support = models.CharField(max_length=10, choices=[('yes', 'Yes'), ('no', 'No'), ('neutral', 'Neutral')])
+    mentor_listening = models.CharField(max_length=10, choices=[('yes', 'Yes'), ('no', 'No'), ('neutral', 'Neutral')])
+    mentor_knowledge = models.CharField(max_length=10, choices=[('yes', 'Yes'), ('no', 'No'), ('neutral', 'Neutral')])
+    mentor_rating = models.PositiveSmallIntegerField(choices=[(i, str(i)) for i in range(1, 6)])
+
+    # Outcomes and takeaways
+    learning = models.TextField()
+    expectations_met = models.CharField(max_length=10, choices=[('yes', 'Yes'), ('no', 'No'), ('partial', 'Partially')])
+    expectations_explanation = models.TextField()
+
+    class Meta:
+        unique_together = ('session', 'mentee')  # One feedback per session per mentee
+
+    def __str__(self):
+        return f"Feedback by {self.mentee.user.username} for {self.mentor.user.username} on {self.session.start_time.strftime('%Y-%m-%d')}"
+
+class MentorEvaluation(models.Model):
+    session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='mentor_evaluations')
+    mentor = models.ForeignKey(Mentor, on_delete=models.CASCADE, related_name='mentor_evaluations')
+    mentee = models.ForeignKey(Mentee, on_delete=models.CASCADE, related_name='mentor_evaluations')
+    evaluation_date = models.DateField()
+
+    # Mentee Engagement
+    PUNCTUALITY_CHOICES = [
+        ('always_on_time', 'Always On Time'),
+        ('sometimes_late', 'Sometimes Late'),
+        ('frequently_absent', 'Frequently Absent'),
+    ]
+    punctuality = models.CharField(max_length=20, choices=PUNCTUALITY_CHOICES)
+
+    PREPAREDNESS_CHOICES = [
+        ('well_prepared', 'Well-prepared'),
+        ('somewhat_prepared', 'Somewhat Prepared'),
+        ('unprepared', 'Unprepared'),
+    ]
+    preparedness = models.CharField(max_length=20, choices=PREPAREDNESS_CHOICES)
+
+    PARTICIPATION_CHOICES = [
+        ('highly_engaged', 'Highly Engaged'),
+        ('engaged', 'Engaged'),
+        ('somewhat_engaged', 'Somewhat Engaged'),
+        ('not_participative', 'Not Participative'),
+    ]
+    participation = models.CharField(max_length=20, choices=PARTICIPATION_CHOICES)
+
+    RESPONSIVENESS_CHOICES = [
+        ('excellent', 'Excellent'),
+        ('good', 'Good'),
+        ('average', 'Average'),
+        ('poor', 'Poor'),
+    ]
+    responsiveness = models.CharField(max_length=10, choices=RESPONSIVENESS_CHOICES)
+
+    INITIATIVE_CHOICES = [
+        ('yes', 'Yes'),
+        ('no', 'No'),
+    ]
+    initiative = models.CharField(max_length=3, choices=INITIATIVE_CHOICES)
+    initiative_comment = models.TextField(blank=True, null=True)
+
+    # Progress Evaluation
+    PROGRESS_CHOICES = [
+        ('excellent', 'Excellent'),
+        ('good', 'Good'),
+        ('average', 'Average'),
+        ('needs_improvement', 'Needs Improvement'),
+    ]
+    progress = models.CharField(max_length=20, choices=PROGRESS_CHOICES)
+    improvement_since_last = models.TextField(blank=True, null=True)
+    key_skills = models.TextField(blank=True, null=True)
+    challenges = models.TextField(blank=True, null=True)
+    tasks_completed = models.CharField(max_length=3, choices=INITIATIVE_CHOICES)
+    tasks_comment = models.TextField(blank=True, null=True)
+
+    # Mentor’s Observations
+    strengths = models.TextField(blank=True, null=True)
+    areas_for_improvement = models.TextField(blank=True, null=True)
+    overall_evaluation = models.CharField(max_length=20, choices=PROGRESS_CHOICES)
+    recommend_advanced = models.CharField(max_length=3, choices=INITIATIVE_CHOICES)
+    recommend_comment = models.TextField(blank=True, null=True)
+
+    class Meta:
+        unique_together = ('session', 'mentor', 'mentee')
+
+    def __str__(self):
+        return f"Evaluation by {self.mentor.user.username} for {self.mentee.user.username} on {self.session.start_time.strftime('%Y-%m-%d')}"

@@ -19,7 +19,7 @@
         --danger-light: #fee2e2;
         --text-dark: #1f2937;
         --text-light: #6b7280;
-        --background-light: #f9fafb;
+        --background-light: #816eeb;
         --white: #ffffff;
         --border-color: #e5e7eb;
         --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -253,6 +253,7 @@
                             <a href="{% url 'progress_tracking:goal_detail' goal.pk %}">{{ goal.title }}</a>
                         </h3>
                         <p class="goal-description">{{ goal.description|truncatewords:15 }}</p>
+                        <p><strong>Mentee:</strong> {{ goal.mentee }}</p>
                         <div class="progress-section">
                             <div class="progress-header">
                                 <span>Progress</span>

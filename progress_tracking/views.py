@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from mentorship.models import Mentee, Mentor, MentorshipRequest # Import Mentee and Mentor models
+from mentorship.models import Mentee, Mentor, MentorshipRequest
 from django.contrib import messages
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.urls import reverse_lazy
@@ -22,16 +22,20 @@ class GoalListView(LoginRequiredMixin, ListView):
     template_name = 'progress_tracking/goal_list.html'
     context_object_name = 'goals'
     paginate_by = 10
-    
+
     def get_queryset(self):
         user = self.request.user
         if user.groups.filter(name='Mentor').exists():
-            # Mentors see goals of their mentees
-            return Goal.objects.filter(mentor=user)
+            # Mentors see goals of their accepted mentees
+            mentor_mentees = MentorshipRequest.objects.filter(
+                mentor__user=user,
+                status='ACCEPTED'
+            ).values_list('mentee__user', flat=True)
+            return Goal.objects.filter(mentee__in=mentor_mentees)
         else:
             # Mentees see their own goals
             return Goal.objects.filter(mentee=user)
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['user_role'] = 'mentor' if self.request.user.groups.filter(name='Mentor').exists() else 'mentee'
@@ -51,7 +55,6 @@ class GoalCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         mentee_profile = self.request.user.mentee
         form.instance.mentee = mentee_profile.user
 
-        # Attempt to find an accepted mentorship request to assign a mentor
         try:
             accepted_request = MentorshipRequest.objects.get(
                 mentee=mentee_profile,
@@ -59,10 +62,8 @@ class GoalCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             )
             form.instance.mentor = accepted_request.mentor.user
         except MentorshipRequest.DoesNotExist:
-            # If no accepted mentor, the mentor field will remain null (if allowed by model)
             messages.warning(self.request, "No accepted mentor found for this mentee. Goal created without an assigned mentor.")
         except MentorshipRequest.MultipleObjectsReturned:
-            # Handle case where multiple accepted requests exist (shouldn't happen with unique constraint)
             messages.warning(self.request, "Multiple accepted mentors found. Assigning the first one.")
             accepted_request = MentorshipRequest.objects.filter(
                 mentee=mentee_profile,
@@ -83,7 +84,11 @@ class GoalUpdateView(LoginRequiredMixin, UpdateView):
     def get_queryset(self):
         user = self.request.user
         if user.groups.filter(name='Mentor').exists():
-            return Goal.objects.filter(mentor=user)
+            mentor_mentees = MentorshipRequest.objects.filter(
+                mentor__user=user,
+                status='ACCEPTED'
+            ).values_list('mentee__user', flat=True)
+            return Goal.objects.filter(mentee__in=mentor_mentees)
         else:
             return Goal.objects.filter(mentee=user)
     
@@ -98,7 +103,15 @@ class GoalDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('progress_tracking:goal_list')
     
     def get_queryset(self):
-        return Goal.objects.filter(mentee=self.request.user)
+        user = self.request.user
+        if user.groups.filter(name='Mentor').exists():
+            mentor_mentees = MentorshipRequest.objects.filter(
+                mentor__user=user,
+                status='ACCEPTED'
+            ).values_list('mentee__user', flat=True)
+            return Goal.objects.filter(mentee__in=mentor_mentees)
+        else:
+            return Goal.objects.filter(mentee=user)
     
     def delete(self, request, *args, **kwargs):
         messages.success(request, 'Goal deleted successfully!')
@@ -147,11 +160,12 @@ def dashboard_view(request):
             'active_goals': mentee_goals.filter(status='in_progress').count(),
             'completed_goals': mentee_goals.filter(status='completed').count(),
             'overdue_goals': [goal for goal in mentee_goals if goal.is_overdue],
-            'recent_progress': ProgressEntry.objects.filter(goal__mentor=user)[:5],
+            'recent_progress': ProgressEntry.objects.filter(goal__in=mentee_goals)[:5],
             'goal_stats': mentee_goals.aggregate(
                 avg_progress=Avg('progress_percentage'),
                 total_goals=Count('id')
-            )
+            ),
+            'goals': mentee_goals # Pass the goals to the template
         })
     else:
         # Mentee dashboard
@@ -166,7 +180,8 @@ def dashboard_view(request):
             'goal_stats': user_goals.aggregate(
                 avg_progress=Avg('progress_percentage'),
                 total_goals=Count('id')
-            )
+            ),
+            'goals': user_goals # Pass the goals to the template
         })
     
     return render(request, 'progress_tracking/dashboard.html', context)
@@ -177,7 +192,7 @@ def goal_detail_view(request, pk):
     goal = get_object_or_404(Goal, pk=pk)
     
     # Check permissions
-    if not (goal.mentee == request.user or goal.mentor == request.user):
+    if not (goal.mentee == request.user or request.user.groups.filter(name='Mentor').exists()):
         messages.error(request, 'You do not have permission to view this goal.')
         return redirect('progress_tracking:goal_list')
     
@@ -186,8 +201,8 @@ def goal_detail_view(request, pk):
     context = {
         'goal': goal,
         'progress_entries': progress_entries,
-        'can_edit': goal.mentee == request.user or goal.mentor == request.user,
-        'can_add_progress': True,  # Both mentors and mentees can add progress
+        'can_edit': goal.mentee == request.user or request.user.groups.filter(name='Mentor').exists(),
+        'can_add_progress': True,
     }
     
     return render(request, 'progress_tracking/goal_detail.html', context)
@@ -199,7 +214,7 @@ def progress_chart_data(request, goal_id):
     goal = get_object_or_404(Goal, pk=goal_id)
     
     # Check permissions
-    if not (goal.mentee == request.user or goal.mentor == request.user):
+    if not (goal.mentee == request.user or request.user.groups.filter(name='Mentor').exists()):
         return JsonResponse({'error': 'Permission denied'}, status=403)
     
     progress_entries = goal.progress_entries.all()
@@ -223,7 +238,11 @@ class GoalViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if user.groups.filter(name='Mentor').exists():
-            return Goal.objects.filter(mentor=user)
+            mentor_mentees = MentorshipRequest.objects.filter(
+                mentor__user=user,
+                status='ACCEPTED'
+            ).values_list('mentee__user', flat=True)
+            return Goal.objects.filter(mentee__in=mentor_mentees)
         else:
             return Goal.objects.filter(mentee=user)
     
@@ -245,7 +264,11 @@ class ProgressEntryViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if user.groups.filter(name='Mentor').exists():
-            return ProgressEntry.objects.filter(goal__mentor=user)
+            mentor_mentees = MentorshipRequest.objects.filter(
+                mentor__user=user,
+                status='ACCEPTED'
+            ).values_list('mentee__user', flat=True)
+            return ProgressEntry.objects.filter(goal__mentee__in=mentor_mentees)
         else:
             return ProgressEntry.objects.filter(goal__mentee=user)
     

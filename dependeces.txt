@@ -1,2 +1,4 @@
 django
 Pillow
+djangorestframework
+psycopg2-binary(The Python Translator)

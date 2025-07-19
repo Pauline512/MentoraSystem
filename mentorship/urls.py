@@ -28,4 +28,8 @@ urlpatterns = [
     path('notifications/mark-read/<int:notification_pk>/', views.mark_notification_read_and_redirect, name='mark_notification_read_and_redirect'),
     path('session/<int:session_pk>/complete/', views.complete_session, name='complete_session'),
     path('session/<int:session_pk>/report/', views.generate_session_report, name='generate_session_report'),
+    path('profile/update/', views.update_profile, name='update_profile'),
+    path('session/<int:session_pk>/feedback/', views.provide_feedback, name='provide_feedback'),
+    path('mentor/session/<int:session_pk>/complete/', views.mentor_complete_session, name='mentor_complete_session'),
+    path('mentor/session/<int:session_pk>/evaluate/', views.mentor_evaluate_mentee, name='mentor_evaluate_mentee'),
 ]

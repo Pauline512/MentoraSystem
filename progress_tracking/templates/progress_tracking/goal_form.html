@@ -16,19 +16,30 @@
     :root {
         --primary-color: #4f46e5;
         --primary-hover: #4338ca;
+        --primary-light: #eef2ff;
+        --success-color: #10b981;
+        --success-light: #f0fdf4;
+        --warning-color: #f59e0b;
+        --warning-light: #fffbeb;
+        --danger-color: #ef4444;
+        --danger-light: #fef2f2;
+        --accent-color: #a78bfa;
+        --accent-light: #f3f0ff;
         --text-dark: #1f2937;
         --text-light: #6b7280;
-        --background-light: #f9fafb;
+        --background-light: #d177d4;
+        --background-gradient: linear-gradient(135deg, #eef2ff 0%, #a78bfa 100%);
         --white: #ffffff;
         --border-color: #e5e7eb;
-        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        --card-shadow: 0 4px 16px -2px rgb(79 70 229 / 0.10);
         --border-radius: 0.75rem;
         --transition: all 0.2s ease-in-out;
     }
 
     body {
         font-family: 'Inter', sans-serif;
-        background-color: var(--background-light);
+        background: var(--background-gradient);
+        min-height: 100vh;
     }
 
     .form-container {
@@ -41,13 +52,13 @@
         background-color: var(--white);
         border-radius: var(--border-radius);
         border: 1px solid var(--border-color);
-        box-shadow: var(--shadow-md);
+        box-shadow: var(--card-shadow);
         overflow: hidden;
     }
 
     .card-header {
         padding: 2rem;
-        background-color: var(--primary-color);
+        background: linear-gradient(90deg, var(--primary-color) 60%, var(--accent-color) 100%);
         color: var(--white);
         border-bottom: 1px solid var(--border-color);
     }
@@ -153,6 +164,7 @@
                 {% csrf_token %}
                 
                 {% for field in form %}
+                    {% if field.name != 'mentor' %}
                     <div class="form-group">
                         <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                         {{ field }}
@@ -163,7 +175,29 @@
                             {{ field.errors }}
                         {% endif %}
                     </div>
+                    {% endif %}
                 {% endfor %}
+
+                <!-- Mentor selection field (optional) as dropdown -->
+                <div class="form-group">
+                    <label for="{{ form.mentor.id_for_label }}">Mentor (optional)</label>
+                    <select name="mentor" id="{{ form.mentor.id_for_label }}" class="form-control">
+                        <option value="">---------</option>
+                        {% for mentor in form.fields.mentor.queryset %}
+                            <option value="{{ mentor.pk }}"
+                                {% if form.initial.mentor == mentor.pk or form.data.mentor == mentor.pk|stringformat:"s" %}
+                                    selected
+                                {% endif %}
+                            >{{ mentor.get_full_name|default:mentor.username }}</option>
+                        {% endfor %}
+                    </select>
+                    {% if form.mentor.help_text %}
+                        <small class="form-text text-muted" style="font-size: 0.8rem; color: var(--text-light);">{{ form.mentor.help_text }}</small>
+                    {% endif %}
+                    {% if form.mentor.errors %}
+                        {{ form.mentor.errors }}
+                    {% endif %}
+                </div>
                 
                 <div class="form-actions">
                     <a href="{% url 'progress_tracking:goal_list' %}" class="btn btn-secondary">Cancel</a>
@@ -184,9 +218,6 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // This is a common pattern in Django forms. When you render {{ field }},
-    // Django automatically adds an 'id' attribute. We can then select all
-    // input, textarea, and select elements within the form and add our class.
     const form = document.querySelector('form');
     form.querySelectorAll('input, textarea, select').forEach(el => {
         el.classList.add('form-control');

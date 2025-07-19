@@ -355,12 +355,12 @@
                     <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                     {% if field.name == 'username' %}
                         <div class="input-group">
-                            <span class="input-icon">👤</span>
+                            <span class="input-icon"></span>
                             {{ field }}
                         </div>
                     {% elif field.name == 'password' %}
                         <div class="input-group">
-                            <span class="input-icon">🔒</span>
+                            <span class="input-icon"></span>
                             {{ field }}
                             <span class="password-toggle" onclick="togglePassword()">👁️</span>
                         </div>
@@ -393,7 +393,7 @@
         </div>
         
         <div class="login-stats">
-            Secure login • Protected by SSL
+            Secure login 
         </div>
     </div>
 

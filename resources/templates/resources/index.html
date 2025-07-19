@@ -236,7 +236,7 @@
             </div>
             
             {% if user.is_authenticated and user.mentor %}
-                <a href="{% url 'resources:upload' %}" class="upload-btn">
+                <a href="{% url 'resources:upload_resource' %}" class="upload-btn">
                     <i class="fas fa-cloud-upload-alt"></i> Upload New Resource
                 </a>
             {% endif %}
@@ -285,7 +285,7 @@
                             {% endif %}
                             
                             {% if user == resource.uploader or user.is_staff %}
-                                <a href="{% url 'resources:edit' resource.pk %}" class="action-btn edit">Edit</a>
+                                <a href="{% url 'resources:edit_resource' resource.pk %}" class="action-btn edit">Edit</a>
                             {% endif %}
                         </div>
                     </div>

@@ -1,0 +1,39 @@
+{% extends 'mentorship/base.html' %}
+
+{% block title %}Evaluate Mentee{% endblock %}
+
+{% block content %}
+<div class="profile-container" style="max-width:700px;margin:2rem auto;">
+    <h2>Evaluate Mentee</h2>
+    <div style="margin-bottom:1.5rem;">
+        <strong>Session Date:</strong> {{ session_date|date:"M d, Y H:i" }}<br>
+        <strong>Mentee:</strong> {{ mentee.user.get_full_name|default:mentee.user.username }}
+    </div>
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <form method="post" style="background:#f8fafc;padding:2rem;border-radius:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="form-group" style="margin-bottom:1.5rem;">
+                <label for="{{ field.id_for_label }}" style="font-weight:600;">{{ field.label }}</label><br>
+                {{ field }}
+                {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+                {% if field.errors %}
+                    <ul class="errorlist">
+                        {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary" style="margin-top:1rem;">Submit Evaluation</button>
+        <a href="{% url 'mentor_dashboard' %}" class="btn btn-secondary" style="margin-top:1rem; margin-left:1rem; background:#64748b; color:#fff; border-radius:0.5rem; text-decoration:none; padding:0.5rem 1.5rem;">Cancel</a>
+    </form>
+</div>
+{% endblock %} 
